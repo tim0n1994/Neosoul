@@ -107,7 +107,7 @@ export function RoomView({ roomId, isHost }: Props) {
   }
 
   return (
-    <div className="relative min-h-dvh">
+    <div className="relative" style={{ height: '100vh', width: '100%' }}>
       <LiveKitRoom
         token={token}
         serverUrl={url}
@@ -116,7 +116,7 @@ export function RoomView({ roomId, isHost }: Props) {
         video={false}
       >
         {/* 3D 主视觉（桌面占满，聊天为右侧栏；移动端全屏） */}
-        <div className="absolute inset-0 md:right-80">
+        <div className="absolute inset-0 md:right-80" style={{ height: '100%' }}>
           <PartyScene />
         </div>
         <RoomAudioRenderer />

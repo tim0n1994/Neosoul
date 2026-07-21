@@ -86,16 +86,18 @@ function SceneContent() {
 // R3F Canvas：深色背景 + 雾，camera 俯视（PRD §11.2）
 export function PartyScene() {
   return (
-    <Canvas
-      camera={{ position: [0, 3.5, 6], fov: 50 }}
-      dpr={[1, 1.5]}
-      frameloop="always"
-      style={{ background: 'radial-gradient(circle at 50% 40%, #14142a 0%, #0a0a12 70%)' }}
-    >
-      <fog attach="fog" args={['#0a0a12', 6, 12]} />
-      <Suspense fallback={null}>
-        <SceneContent />
-      </Suspense>
-    </Canvas>
+    <div style={{ width: '100%', height: '100%', minHeight: '100%' }}>
+      <Canvas
+        camera={{ position: [0, 3.5, 6], fov: 50 }}
+        dpr={[1, 1.5]}
+        frameloop="always"
+        style={{ width: '100%', height: '100%', background: 'radial-gradient(circle at 50% 40%, #14142a 0%, #0a0a12 70%)' }}
+      >
+        <fog attach="fog" args={['#0a0a12', 6, 12]} />
+        <Suspense fallback={null}>
+          <SceneContent />
+        </Suspense>
+      </Canvas>
+    </div>
   );
 }
