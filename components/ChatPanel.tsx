@@ -116,11 +116,18 @@ export function ChatPanel({ roomId }: Props) {
     e.preventDefault();
     const body = text.trim().slice(0, MAX_TEXT);
     if (!body) return;
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     setBusy(true);
     setText('');
-    await supabase
-      .from('messages')
-      .insert({ room_id: roomId, kind: 'text', body });
+    const { error } = await supabase.from('messages').insert({
+      room_id: roomId,
+      sender_id: user!.id,
+      kind: 'text',
+      body,
+    });
+    if (error) alert('发送失败：' + error.message);
     setBusy(false);
   }
 
@@ -140,7 +147,9 @@ export function ChatPanel({ roomId }: Props) {
     const {
       data: { user },
     } = await supabase.auth.getUser();
-    const path = `${roomId}/${user?.id}/${Date.now()}-${file.name}`;
+    // 清理文件名：仅保留 ASCII 字母数字和 . - _，避免 Supabase Storage Invalid key
+    const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+    const path = `${roomId}/${user?.id}/${Date.now()}-${safeName}`;
     const { error: upErr } = await supabase.storage
       .from('chat-images')
       .upload(path, file, { contentType: file.type });
@@ -150,9 +159,10 @@ export function ChatPanel({ roomId }: Props) {
       return;
     }
     const { data: pub } = supabase.storage.from('chat-images').getPublicUrl(path);
-    await supabase
+    const { error: mErr } = await supabase
       .from('messages')
-      .insert({ room_id: roomId, kind: 'image', body: pub.publicUrl });
+      .insert({ room_id: roomId, sender_id: user!.id, kind: 'image', body: pub.publicUrl });
+    if (mErr) alert('消息发送失败：' + mErr.message);
     setBusy(false);
   }
 
