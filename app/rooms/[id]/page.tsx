@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { RoomView } from '@/components/RoomView';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 import Link from 'next/link';
 
 export default async function RoomPage({
@@ -52,7 +53,9 @@ export default async function RoomPage({
           离开房间
         </Link>
       </div>
-      <RoomView roomId={room.id} isHost={isHost} />
+      <ErrorBoundary>
+        <RoomView roomId={room.id} isHost={isHost} />
+      </ErrorBoundary>
     </main>
   );
 }

@@ -3,7 +3,7 @@
 import { Canvas } from '@react-three/fiber';
 import { useParticipants } from '@livekit/components-react';
 import { AvatarOrb } from '@/components/AvatarOrb';
-import { useMemo } from 'react';
+import { Suspense, useMemo } from 'react';
 
 const THEME_COLOR = '#7c5cff';
 const INNER_R = 1.6; // 上麦者内圈半径
@@ -93,7 +93,9 @@ export function PartyScene() {
       style={{ background: 'radial-gradient(circle at 50% 40%, #14142a 0%, #0a0a12 70%)' }}
     >
       <fog attach="fog" args={['#0a0a12', 6, 12]} />
-      <SceneContent />
+      <Suspense fallback={null}>
+        <SceneContent />
+      </Suspense>
     </Canvas>
   );
 }
