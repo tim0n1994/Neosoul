@@ -8,7 +8,8 @@ import { randomSeed } from '@/lib/avatar';
 
 export default function OnboardingPage() {
   const router = useRouter();
-  const supabase = createClient();
+  // 固定 supabase 实例，避免每次渲染新建导致 useEffect 无限重跑
+  const [supabase] = useState(() => createClient());
 
   const [userId, setUserId] = useState<string | null>(null);
   const [displayName, setDisplayName] = useState('');
@@ -19,23 +20,27 @@ export default function OnboardingPage() {
 
   useEffect(() => {
     (async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) {
-        router.replace('/login');
-        return;
-      }
-      setUserId(user.id);
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('display_name, avatar_style, avatar_seed')
-        .eq('id', user.id)
-        .maybeSingle();
-      if (profile) {
-        setDisplayName(profile.display_name === 'Guest' ? '' : profile.display_name);
-        setStyle(profile.avatar_style ?? 'thumbs');
-        setSeed(profile.avatar_seed ?? randomSeed());
+      try {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        if (!user) {
+          router.replace('/login');
+          return;
+        }
+        setUserId(user.id);
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('display_name, avatar_style, avatar_seed')
+          .eq('id', user.id)
+          .maybeSingle();
+        if (profile) {
+          setDisplayName(!profile.display_name || profile.display_name === 'Guest' ? '' : profile.display_name);
+          setStyle(profile.avatar_style ?? 'thumbs');
+          setSeed(profile.avatar_seed ?? randomSeed());
+        }
+      } catch {
+        setError('加载失败，请刷新重试');
       }
     })();
   }, [router, supabase]);

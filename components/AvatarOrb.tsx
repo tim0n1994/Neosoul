@@ -2,7 +2,7 @@
 
 import { useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { useTexture, Text } from '@react-three/drei';
+import { useTexture, Html } from '@react-three/drei';
 import * as THREE from 'three';
 import type { Participant } from 'livekit-client';
 import { avatarDataUri } from '@/lib/avatar';
@@ -91,18 +91,24 @@ export function AvatarOrb({
         <meshBasicMaterial color={themeColor} transparent opacity={0} side={THREE.DoubleSide} />
       </mesh>
 
-      {/* 昵称 */}
-      <Text
+      {/* 昵称（用 Html 避免 troika 字体 CDN 加载阻塞）*/}
+      <Html
         position={[0, 0.85, 0]}
-        fontSize={0.18}
-        color="#ffffff"
-        anchorX="center"
-        anchorY="middle"
-        outlineWidth={0.01}
-        outlineColor="#000000"
+        center
+        distanceFactor={6}
+        style={{ pointerEvents: 'none', whiteSpace: 'nowrap' }}
       >
-        {isOnMic ? `🎤 ${name}` : name}
-      </Text>
+        <span
+          style={{
+            fontSize: '14px',
+            fontWeight: 300,
+            color: '#f5efe9',
+            textShadow: '0 1px 4px rgba(0,0,0,0.8)',
+          }}
+        >
+          {isOnMic ? `🎤 ${name}` : name}
+        </span>
+      </Html>
     </group>
   );
 }

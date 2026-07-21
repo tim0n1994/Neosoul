@@ -26,7 +26,7 @@ const MAX_TEXT = 500;
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 
 export function ChatPanel({ roomId }: Props) {
-  const supabase = createClient();
+  const [supabase] = useState(() => createClient());
   const [messages, setMessages] = useState<Message[]>([]);
   const [senders, setSenders] = useState<Record<string, Sender>>({});
   const [text, setText] = useState('');
@@ -69,6 +69,10 @@ export function ChatPanel({ roomId }: Props) {
     };
   }, [roomId, supabase]);
 
+  // 用 ref 持有最新 senders，避免 realtime 回调闭包 stale（每条消息重复 fetch）
+  const sendersRef = useRef(senders);
+  sendersRef.current = senders;
+
   useEffect(() => {
     const channel = supabase
       .channel(`room:${roomId}`)
@@ -78,7 +82,7 @@ export function ChatPanel({ roomId }: Props) {
         async (payload) => {
           const msg = payload.new as Message;
           setMessages((prev) => [...prev, msg]);
-          if (!senders[msg.sender_id]) {
+          if (!sendersRef.current[msg.sender_id]) {
             const { data: prof } = await supabase
               .from('profiles')
               .select('display_name, avatar_style, avatar_seed')
@@ -115,11 +119,12 @@ export function ChatPanel({ roomId }: Props) {
     const {
       data: { user },
     } = await supabase.auth.getUser();
+    if (!user) return;
     setBusy(true);
     setText('');
     const { error } = await supabase.from('messages').insert({
       room_id: roomId,
-      sender_id: user!.id,
+      sender_id: user.id,
       kind: 'text',
       body,
     });
@@ -143,6 +148,10 @@ export function ChatPanel({ roomId }: Props) {
     const {
       data: { user },
     } = await supabase.auth.getUser();
+    if (!user) {
+      setBusy(false);
+      return;
+    }
     const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
     const path = `${roomId}/${user?.id}/${Date.now()}-${safeName}`;
     const { error: upErr } = await supabase.storage
@@ -156,7 +165,7 @@ export function ChatPanel({ roomId }: Props) {
     const { data: pub } = supabase.storage.from('chat-images').getPublicUrl(path);
     const { error: mErr } = await supabase
       .from('messages')
-      .insert({ room_id: roomId, sender_id: user!.id, kind: 'image', body: pub.publicUrl });
+      .insert({ room_id: roomId, sender_id: user.id, kind: 'image', body: pub.publicUrl });
     if (mErr) alert('消息发送失败：' + mErr.message);
     setBusy(false);
   }

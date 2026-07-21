@@ -7,7 +7,7 @@ import { createClient } from '@/lib/supabase/client';
 // 「+ 创建房间」：房名 + 可选背景图 → insert rooms → 跳房
 export function CreateRoomButton() {
   const router = useRouter();
-  const supabase = createClient();
+  const [supabase] = useState(() => createClient());
 
   const [open, setOpen] = useState(false);
   const [name, setName] = useState('');
@@ -35,6 +35,8 @@ export function CreateRoomButton() {
       return;
     }
     setError(null);
+    // 释放之前的 blob URL，避免内存泄漏
+    if (bgPreview) URL.revokeObjectURL(bgPreview);
     setBgPreview(URL.createObjectURL(file));
 
     // 上传到 chat-images bucket（复用），路径用 background 前缀
@@ -135,7 +137,7 @@ export function CreateRoomButton() {
                   <div className="absolute inset-0 bg-gradient-to-t from-ink-950/60 to-transparent" />
                   <button
                     type="button"
-                    onClick={() => { setBgPreview(null); setBgPath(null); }}
+                    onClick={() => { if (bgPreview) URL.revokeObjectURL(bgPreview); setBgPreview(null); setBgPath(null); }}
                     className="absolute right-2 top-2 rounded-full bg-ink-950/60 px-2 py-1 text-[10px] text-cream-100"
                   >
                     移除
