@@ -108,11 +108,6 @@ export function RoomView({ roomId, isHost }: Props) {
 
   return (
     <div className="relative min-h-dvh">
-      {/* 3D 主视觉（桌面占满，聊天为右侧栏；移动端全屏） */}
-      <div className="absolute inset-0 md:right-80">
-        <PartyScene />
-      </div>
-
       <LiveKitRoom
         token={token}
         serverUrl={url}
@@ -120,6 +115,10 @@ export function RoomView({ roomId, isHost }: Props) {
         audio={false}
         video={false}
       >
+        {/* 3D 主视觉（桌面占满，聊天为右侧栏；移动端全屏） */}
+        <div className="absolute inset-0 md:right-80">
+          <PartyScene />
+        </div>
         <RoomAudioRenderer />
         <RoomEventHandlers isHost={isHost} />
         <HostMicSetup isHost={isHost} />
@@ -128,51 +127,51 @@ export function RoomView({ roomId, isHost }: Props) {
           onOpenHostPanel={isHost ? () => setHostPanelOpen(true) : undefined}
           onToggleChat={toggleChat}
         />
-      </LiveKitRoom>
 
-      {/* 桌面端：右侧聊天栏 */}
-      <aside className="absolute right-0 top-0 z-20 hidden h-full w-80 border-l border-white/10 bg-black/40 md:block">
-        <ChatPanel roomId={roomId} />
-      </aside>
+        {/* 桌面端：右侧聊天栏 */}
+        <aside className="absolute right-0 top-0 z-20 hidden h-full w-80 border-l border-white/10 bg-black/40 md:block">
+          <ChatPanel roomId={roomId} />
+        </aside>
 
-      {/* 移动端：聊天抽屉 */}
-      {chatOpen && (
-        <div
-          className="fixed inset-0 z-50 flex flex-col justify-end bg-black/50 md:hidden"
-          onClick={toggleChat}
-        >
+        {/* 移动端：聊天抽屉 */}
+        {chatOpen && (
           <div
-            className="h-[70vh] w-full border-t border-white/10 bg-[#0a0a12]"
-            onClick={(e) => e.stopPropagation()}
+            className="fixed inset-0 z-50 flex flex-col justify-end bg-black/50 md:hidden"
+            onClick={toggleChat}
           >
-            <ChatPanel roomId={roomId} />
-          </div>
-        </div>
-      )}
-
-      {/* 房主管麦抽屉（PRD §8.4） */}
-      {hostPanelOpen && (
-        <div
-          className="fixed inset-0 z-50 flex justify-end bg-black/50"
-          onClick={() => setHostPanelOpen(false)}
-        >
-          <div
-            className="h-full w-80 max-w-[85vw] overflow-y-auto border-l border-white/10 bg-[#0a0a12] p-4"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="mb-4 flex items-center justify-between">
-              <h2 className="font-bold">房间管理</h2>
-              <button
-                onClick={() => setHostPanelOpen(false)}
-                className="text-sm text-white/40"
-              >
-                关闭
-              </button>
+            <div
+              className="h-[70vh] w-full border-t border-white/10 bg-[#0a0a12]"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <ChatPanel roomId={roomId} />
             </div>
-            <HostPanel roomId={roomId} />
           </div>
-        </div>
-      )}
+        )}
+
+        {/* 房主管麦抽屉（PRD §8.4） */}
+        {hostPanelOpen && (
+          <div
+            className="fixed inset-0 z-50 flex justify-end bg-black/50"
+            onClick={() => setHostPanelOpen(false)}
+          >
+            <div
+              className="h-full w-80 max-w-[85vw] overflow-y-auto border-l border-white/10 bg-[#0a0a12] p-4"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="mb-4 flex items-center justify-between">
+                <h2 className="font-bold">房间管理</h2>
+                <button
+                  onClick={() => setHostPanelOpen(false)}
+                  className="text-sm text-white/40"
+                >
+                  关闭
+                </button>
+              </div>
+              <HostPanel roomId={roomId} />
+            </div>
+          </div>
+        )}
+      </LiveKitRoom>
 
       {!entered && (
         <div className="absolute inset-0 z-40 flex flex-col items-center justify-center gap-4 bg-black/70 p-6 text-center">
