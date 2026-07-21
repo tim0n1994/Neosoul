@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
 import {
   LiveKitRoom,
   RoomAudioRenderer,
@@ -18,9 +19,10 @@ import { useUI } from '@/lib/store';
 interface Props {
   roomId: string;
   isHost: boolean;
+  roomName: string;
+  backgroundUrl: string | null;
 }
 
-// 房主连上后自动开麦（token 已带 canPublish=true）。
 function HostMicSetup({ isHost }: { isHost: boolean }) {
   const connectionState = useConnectionState();
   const { localParticipant } = useLocalParticipant();
@@ -28,25 +30,19 @@ function HostMicSetup({ isHost }: { isHost: boolean }) {
   const done = useRef(false);
 
   useEffect(() => {
-    if (
-      connectionState === ConnectionState.Connected &&
-      isHost &&
-      !done.current
-    ) {
+    if (connectionState === ConnectionState.Connected && isHost && !done.current) {
       done.current = true;
       localParticipant
         .setMicrophoneEnabled(true)
         .then(() => setMicEnabled(true))
-        .catch(() => {
-          /* 浏览器拒绝麦克风权限：UI 仍显示未开麦（PRD §16） */
-        });
+        .catch(() => {});
     }
   }, [connectionState, isHost, localParticipant, setMicEnabled]);
 
   return null;
 }
 
-export function RoomView({ roomId, isHost }: Props) {
+export function RoomView({ roomId, isHost, roomName, backgroundUrl }: Props) {
   const [token, setToken] = useState<string | null>(null);
   const [url, setUrl] = useState('');
   const [entered, setEntered] = useState(false);
@@ -83,107 +79,147 @@ export function RoomView({ roomId, isHost }: Props) {
     };
   }, [roomId]);
 
-  // 移动端音频自动播放限制：需一次用户手势才连接（PRD §16）
   if (error) {
     return (
-      <div className="flex min-h-dvh flex-col items-center justify-center gap-4 p-6 text-center">
-        <p className="text-red-400">{error}</p>
+      <main className="relative flex min-h-[100dvh] flex-col items-center justify-center gap-4 p-6 text-center">
+        <p className="text-sm text-rose/80">{error}</p>
         <button
           onClick={() => location.reload()}
-          className="rounded-xl border border-white/10 px-4 py-2 text-sm"
+          className="rounded-full border border-white/8 px-5 py-2 text-xs font-light text-cream-100"
         >
           重试
         </button>
-      </div>
-    );
-  }
-
-  if (!token) {
-    return (
-      <div className="flex min-h-dvh items-center justify-center text-sm text-white/40">
-        连接中…
-      </div>
+      </main>
     );
   }
 
   return (
-    <div className="relative" style={{ height: '100vh', width: '100%' }}>
-      <LiveKitRoom
-        token={token}
-        serverUrl={url}
-        connect={entered}
-        audio={false}
-        video={false}
-      >
-        {/* 3D 主视觉（桌面占满，聊天为右侧栏；移动端全屏） */}
-        <div className="absolute inset-0 md:right-80" style={{ height: '100%' }}>
-          <PartyScene />
+    <main className="relative h-[100dvh] w-full overflow-hidden">
+      {/* 房间背景图 + 朦胧调暗覆盖（暧昧·高级感核心）*/}
+      {backgroundUrl ? (
+        <>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={backgroundUrl}
+            alt=""
+            className="fixed inset-0 h-full w-full object-cover"
+          />
+          {/* 暗化 + 朦胧 */}
+          <div className="room-overlay" />
+        </>
+      ) : (
+        /* 无背景图时的暧昧深空渐变 */
+        <div className="pointer-events-none fixed inset-0">
+          <div className="absolute top-1/4 left-1/3 h-[600px] w-[600px] rounded-full bg-rose/6 blur-[140px]" />
+          <div className="absolute bottom-0 right-1/4 h-[400px] w-[400px] rounded-full bg-gold/4 blur-[120px]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-ink-950/80 via-ink-900/60 to-ink-950/90" />
         </div>
-        <RoomAudioRenderer />
-        <RoomEventHandlers isHost={isHost} />
-        <HostMicSetup isHost={isHost} />
-        <MicControls
-          isHost={isHost}
-          onOpenHostPanel={isHost ? () => setHostPanelOpen(true) : undefined}
-          onToggleChat={toggleChat}
-        />
+      )}
 
-        {/* 桌面端：右侧聊天栏 */}
-        <aside className="absolute right-0 top-0 z-20 hidden h-full w-80 border-l border-white/10 bg-black/40 md:block">
-          <ChatPanel roomId={roomId} />
-        </aside>
+      {/* 顶部信息栏（玻璃）*/}
+      <div className="absolute left-0 right-0 top-0 z-30 flex items-center justify-between p-4">
+        <div className="glass rounded-full px-4 py-1.5">
+          <span className="text-sm font-light text-cream-50">{roomName}</span>
+          {isHost && <span className="ml-2 text-[10px] font-medium tracking-wider text-rose-light">房主</span>}
+        </div>
+        <Link
+          href="/rooms"
+          className="glass rounded-full px-4 py-1.5 text-xs font-light text-cream-200 transition-colors hover:text-cream-50"
+        >
+          离开
+        </Link>
+      </div>
 
-        {/* 移动端：聊天抽屉 */}
-        {chatOpen && (
-          <div
-            className="fixed inset-0 z-50 flex flex-col justify-end bg-black/50 md:hidden"
-            onClick={toggleChat}
-          >
-            <div
-              className="h-[70vh] w-full border-t border-white/10 bg-[#0a0a12]"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <ChatPanel roomId={roomId} />
-            </div>
+      {/* 主内容 */}
+      {token ? (
+        <LiveKitRoom
+          token={token}
+          serverUrl={url}
+          connect={entered}
+          audio={false}
+          video={false}
+        >
+          {/* 3D 场景 */}
+          <div className="absolute inset-0 z-10 md:right-[340px]" style={{ height: '100%' }}>
+            <PartyScene />
           </div>
-        )}
 
-        {/* 房主管麦抽屉（PRD §8.4） */}
-        {hostPanelOpen && (
-          <div
-            className="fixed inset-0 z-50 flex justify-end bg-black/50"
-            onClick={() => setHostPanelOpen(false)}
-          >
+          <RoomAudioRenderer />
+          <RoomEventHandlers isHost={isHost} />
+          <HostMicSetup isHost={isHost} />
+
+          {/* 底部麦控（玻璃浮岛）*/}
+          <MicControls
+            isHost={isHost}
+            onOpenHostPanel={isHost ? () => setHostPanelOpen(true) : undefined}
+            onToggleChat={toggleChat}
+          />
+
+          {/* 桌面端：右侧聊天（玻璃）*/}
+          <aside className="glass absolute right-0 top-0 z-20 hidden h-full w-[340px] flex-col border-l border-white/5 md:flex">
+            <ChatPanel roomId={roomId} />
+          </aside>
+
+          {/* 移动端聊天抽屉 */}
+          {chatOpen && (
             <div
-              className="h-full w-80 max-w-[85vw] overflow-y-auto border-l border-white/10 bg-[#0a0a12] p-4"
-              onClick={(e) => e.stopPropagation()}
+              className="fixed inset-0 z-50 flex flex-col justify-end bg-black/50 backdrop-blur-sm md:hidden"
+              onClick={toggleChat}
             >
-              <div className="mb-4 flex items-center justify-between">
-                <h2 className="font-bold">房间管理</h2>
-                <button
-                  onClick={() => setHostPanelOpen(false)}
-                  className="text-sm text-white/40"
-                >
-                  关闭
-                </button>
+              <div
+                className="glass-strong h-[72vh] w-full rounded-t-3xl"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <ChatPanel roomId={roomId} />
               </div>
-              <HostPanel roomId={roomId} />
             </div>
-          </div>
-        )}
-      </LiveKitRoom>
+          )}
 
-      {!entered && (
-        <div className="absolute inset-0 z-40 flex flex-col items-center justify-center gap-4 bg-black/70 p-6 text-center">
-          <p className="text-white/70">点击进入房间（需要麦克风权限）</p>
+          {/* 房主管麦抽屉 */}
+          {hostPanelOpen && (
+            <div
+              className="fixed inset-0 z-50 flex justify-end bg-black/50 backdrop-blur-sm"
+              onClick={() => setHostPanelOpen(false)}
+            >
+              <div
+                className="glass-strong h-full w-80 max-w-[85vw] overflow-y-auto p-5"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="mb-5 flex items-center justify-between">
+                  <h2 className="text-sm font-medium tracking-wide text-cream-50">房间管理</h2>
+                  <button
+                    onClick={() => setHostPanelOpen(false)}
+                    className="text-[11px] font-light text-cream-300"
+                  >
+                    关闭
+                  </button>
+                </div>
+                <HostPanel roomId={roomId} />
+              </div>
+            </div>
+          )}
+        </LiveKitRoom>
+      ) : (
+        <div className="absolute inset-0 z-10 flex items-center justify-center">
+          <p className="text-sm font-light text-cream-300">连接中…</p>
+        </div>
+      )}
+
+      {/* 进入房间浮层 */}
+      {token && !entered && (
+        <div className="absolute inset-0 z-40 flex flex-col items-center justify-center gap-6 bg-ink-950/60 backdrop-blur-sm">
+          <div className="text-center space-y-2">
+            <h2 className="text-xl font-light tracking-wide text-cream-50">{roomName}</h2>
+            <p className="text-xs font-light text-cream-300">点击进入，记得打开麦克风</p>
+          </div>
           <button
             onClick={() => setEntered(true)}
-            className="rounded-xl bg-gradient-to-r from-brand-from to-brand-to px-6 py-3 text-sm font-semibold text-white"
+            className="btn-rose rounded-full px-8 py-3 text-sm font-medium tracking-wide text-white"
           >
             进入房间
           </button>
         </div>
       )}
-    </div>
+    </main>
   );
 }

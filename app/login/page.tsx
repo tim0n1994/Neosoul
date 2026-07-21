@@ -14,7 +14,6 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
 
   async function finishAuth() {
-    // 交回落地页判定 onboarding 状态后再分流（PRD §8）
     router.replace('/');
   }
 
@@ -41,7 +40,6 @@ export default function LoginPage() {
       setError(error.message);
       return;
     }
-    // 若开启邮箱确认，需提示查收邮件；否则直接分流。
     if (data.user && data.session) {
       await finishAuth();
     } else {
@@ -62,67 +60,92 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="flex min-h-dvh items-center justify-center p-6">
-      <div className="w-full max-w-sm rounded-3xl border border-white/10 bg-white/5 p-8 backdrop-blur-xl">
-        <div className="mb-8 text-center">
-          <h1 className="bg-gradient-to-r from-brand-from to-brand-to bg-clip-text text-3xl font-bold text-transparent">
+    <main className="relative flex min-h-[100dvh] flex-col items-center justify-center px-6 py-12">
+      {/* 暧昧背景光晕 */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute -top-1/4 left-1/2 h-[500px] w-[500px] -translate-x-1/2 rounded-full bg-rose/8 blur-[120px]" />
+        <div className="absolute bottom-0 right-0 h-[300px] w-[300px] rounded-full bg-gold/6 blur-[100px]" />
+      </div>
+
+      <div className="relative z-10 w-full max-w-[340px] animate-fade-in space-y-8">
+        {/* 品牌 */}
+        <div className="text-center">
+          <h1 className="text-4xl font-light tracking-[0.15em] text-cream-50">
             Neosoul
           </h1>
-          <p className="mt-2 text-sm text-white/50">一场漂浮在深空里的语音派对</p>
+          <p className="mt-3 text-xs font-light tracking-wider text-cream-300">
+            一场漂浮在暧昧深空里的语音派对
+          </p>
         </div>
 
-        <form onSubmit={handleLogin} className="space-y-3">
-          <label className="block">
-            <span className="mb-1 block text-xs text-white/60">邮箱</span>
-            <input
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full rounded-xl border border-white/10 bg-black/30 px-4 py-3 text-sm outline-none focus:border-brand-to"
-              placeholder="you@example.com"
-            />
-          </label>
-          <label className="block">
-            <span className="mb-1 block text-xs text-white/60">密码</span>
-            <input
-              type="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-xl border border-white/10 bg-black/30 px-4 py-3 text-sm outline-none focus:border-brand-to"
-              placeholder="••••••••"
-            />
-          </label>
+        {/* 表单 */}
+        <div className="glass rounded-3xl p-7">
+          <div className="space-y-4">
+            <div>
+              <label className="mb-1.5 block text-[11px] font-medium tracking-wider text-cream-300">
+                邮箱
+              </label>
+              <input
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="input-warm w-full rounded-2xl px-4 py-3 text-sm text-cream-50 outline-none placeholder:text-cream-300/40"
+                placeholder="you@example.com"
+              />
+            </div>
+            <div>
+              <label className="mb-1.5 block text-[11px] font-medium tracking-wider text-cream-300">
+                密码
+              </label>
+              <input
+                type="password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="input-warm w-full rounded-2xl px-4 py-3 text-sm text-cream-50 outline-none placeholder:text-cream-300/40"
+                placeholder="••••••••"
+              />
+            </div>
 
-          {error && <p className="text-xs text-red-400">{error}</p>}
+            {error && (
+              <p className="text-xs leading-relaxed text-rose/80">{error}</p>
+            )}
 
-          <button
-            type="submit"
-            disabled={loading !== null}
-            className="w-full rounded-xl bg-gradient-to-r from-brand-from to-brand-to py-3 text-sm font-semibold text-white disabled:opacity-50"
-          >
-            {loading === 'login' ? '登录中…' : '登录'}
-          </button>
-        </form>
+            <button
+              type="button"
+              onClick={handleLogin}
+              disabled={loading !== null}
+              className="btn-rose w-full rounded-2xl py-3 text-sm font-medium tracking-wide text-white"
+            >
+              {loading === 'login' ? '正在连接…' : '登录'}
+            </button>
+          </div>
 
-        <div className="mt-3 space-y-3">
-          <button
-            type="button"
-            onClick={handleSignUp}
-            disabled={loading !== null}
-            className="w-full rounded-xl border border-white/10 py-3 text-sm text-white/80 disabled:opacity-50"
-          >
-            {loading === 'signup' ? '注册中…' : '注册'}
-          </button>
-          <button
-            type="button"
-            onClick={handleAnonymous}
-            disabled={loading !== null}
-            className="w-full rounded-xl py-3 text-sm text-white/40 hover:text-white/70 disabled:opacity-50"
-          >
-            {loading === 'anon' ? '进入中…' : '先随便逛逛（匿名进入）'}
-          </button>
+          <div className="my-5 flex items-center gap-3">
+            <div className="h-px flex-1 bg-white/5" />
+            <span className="text-[10px] tracking-wider text-cream-300/50">或</span>
+            <div className="h-px flex-1 bg-white/5" />
+          </div>
+
+          <div className="space-y-2.5">
+            <button
+              type="button"
+              onClick={handleSignUp}
+              disabled={loading !== null}
+              className="w-full rounded-2xl border border-white/8 py-3 text-sm font-light tracking-wide text-cream-100 transition-colors hover:border-rose/20 hover:text-cream-50 disabled:opacity-40"
+            >
+              {loading === 'signup' ? '注册中…' : '注册新账号'}
+            </button>
+            <button
+              type="button"
+              onClick={handleAnonymous}
+              disabled={loading !== null}
+              className="w-full rounded-2xl py-3 text-sm font-light tracking-wide text-cream-300 transition-colors hover:text-cream-100 disabled:opacity-40"
+            >
+              {loading === 'anon' ? '进入中…' : '先随便逛逛'}
+            </button>
+          </div>
         </div>
       </div>
     </main>

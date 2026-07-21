@@ -28,6 +28,7 @@ create table if not exists public.rooms (
   name          text not null,
   host_id       uuid not null references public.profiles(id) on delete cascade,
   livekit_room  text not null unique,     -- 例：'room_<id>'
+  background_url text,                     -- 房主自定义房间背景图 URL
   is_live       boolean not null default true,
   created_at    timestamptz not null default now()
 );

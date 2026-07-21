@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
 import {
   useDataChannel,
   useLocalParticipant,
@@ -14,9 +13,7 @@ interface Props {
   onToggleChat?: () => void;
 }
 
-// 底部麦控（PRD §8.4、§10）。
-// - 房主 / 已上麦者：静音 / 解除
-// - 听众：举手（data channel，topic 'raise_hand'）
+// 底部麦控（玻璃浮岛）。
 export function MicControls({ isHost, onOpenHostPanel, onToggleChat }: Props) {
   const { localParticipant } = useLocalParticipant();
   const micEnabled = useUI((s) => s.micEnabled);
@@ -44,52 +41,52 @@ export function MicControls({ isHost, onOpenHostPanel, onToggleChat }: Props) {
   }
 
   return (
-    <div className="pointer-events-none absolute inset-x-0 bottom-0 z-30 flex justify-center gap-3 p-4">
-      <div className="pointer-events-auto flex items-center gap-2 rounded-2xl border border-white/10 bg-black/50 px-3 py-2 backdrop-blur">
+    <div className="pointer-events-none absolute inset-x-0 bottom-0 z-30 flex justify-center p-4">
+      <div className="glass pointer-events-auto flex items-center gap-1.5 rounded-full px-2 py-2">
         {canSpeak ? (
           <button
             onClick={toggle}
             className={
-              'rounded-xl px-4 py-2 text-sm ' +
-              (micEnabled ? 'bg-brand-to/30 text-white' : 'bg-white/10 text-white/60')
+              'flex h-11 w-11 items-center justify-center rounded-full text-base transition-all ' +
+              (micEnabled
+                ? 'bg-rose/20 text-rose-light ring-1 ring-rose/30'
+                : 'bg-white/5 text-cream-300')
             }
           >
-            {micEnabled ? '🎤 静音' : '🎤 已静音'}
+            {micEnabled ? '🎤' : '🔇'}
           </button>
         ) : (
           <button
             onClick={raiseHand}
             disabled={raised}
-            className="rounded-xl bg-white/10 px-4 py-2 text-sm text-white/80 disabled:opacity-50"
+            className={
+              'flex h-11 w-11 items-center justify-center rounded-full text-base transition-all ' +
+              (raised
+                ? 'bg-rose/15 text-rose-light/50'
+                : 'bg-white/5 text-cream-100 hover:bg-white/8')
+            }
           >
-            {raised ? '✋ 已举手' : '✋ 举手'}
+            ✋
           </button>
         )}
 
         {isHost && onOpenHostPanel && (
           <button
             onClick={onOpenHostPanel}
-            className="rounded-xl bg-white/10 px-4 py-2 text-sm text-white/80"
+            className="flex h-11 w-11 items-center justify-center rounded-full bg-white/5 text-base text-cream-200 transition-colors hover:bg-white/8"
           >
-            管理
+            ⚙
           </button>
         )}
 
         {onToggleChat && (
           <button
             onClick={onToggleChat}
-            className="rounded-xl bg-white/10 px-4 py-2 text-sm text-white/80 md:hidden"
+            className="flex h-11 w-11 items-center justify-center rounded-full bg-white/5 text-base text-cream-200 transition-colors hover:bg-white/8 md:hidden"
           >
             💬
           </button>
         )}
-
-        <Link
-          href="/rooms"
-          className="rounded-xl bg-white/10 px-4 py-2 text-sm text-white/80"
-        >
-          离开
-        </Link>
       </div>
     </div>
   );

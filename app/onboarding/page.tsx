@@ -48,11 +48,7 @@ export default function OnboardingPage() {
     setSaving(true);
     const { error } = await supabase
       .from('profiles')
-      .update({
-        display_name: name,
-        avatar_style: style,
-        avatar_seed: seed,
-      })
+      .update({ display_name: name, avatar_style: style, avatar_seed: seed })
       .eq('id', userId);
     setSaving(false);
     if (error) {
@@ -63,39 +59,54 @@ export default function OnboardingPage() {
   }
 
   return (
-    <main className="flex min-h-dvh items-center justify-center p-6">
+    <main className="relative flex min-h-[100dvh] flex-col items-center justify-center px-6 py-12">
+      {/* 暧昧背景光晕 */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute top-1/4 left-1/4 h-[400px] w-[400px] rounded-full bg-rose/8 blur-[120px]" />
+        <div className="absolute bottom-1/4 right-1/4 h-[300px] w-[300px] rounded-full bg-gold/5 blur-[100px]" />
+      </div>
+
       <form
         onSubmit={handleSave}
-        className="w-full max-w-sm space-y-6 rounded-3xl border border-white/10 bg-white/5 p-8 backdrop-blur-xl"
+        className="relative z-10 w-full max-w-[340px] animate-fade-in space-y-6"
       >
-        <h1 className="text-center text-2xl font-bold">完善你的形象</h1>
+        <div className="text-center">
+          <h1 className="text-2xl font-light tracking-wide text-cream-50">完善你的形象</h1>
+          <p className="mt-2 text-xs font-light tracking-wider text-cream-300">
+            选一个属于你的头像
+          </p>
+        </div>
 
-        <AvatarPicker
-          style={style}
-          seed={seed}
-          onChange={(next) => {
-            setStyle(next.style);
-            setSeed(next.seed);
-          }}
-        />
-
-        <label className="block">
-          <span className="mb-1 block text-xs text-white/60">昵称</span>
-          <input
-            value={displayName}
-            onChange={(e) => setDisplayName(e.target.value)}
-            maxLength={40}
-            className="w-full rounded-xl border border-white/10 bg-black/30 px-4 py-3 text-sm outline-none focus:border-brand-to"
-            placeholder="给自己起个名字"
+        <div className="glass rounded-3xl p-7">
+          <AvatarPicker
+            style={style}
+            seed={seed}
+            onChange={(next) => {
+              setStyle(next.style);
+              setSeed(next.seed);
+            }}
           />
-        </label>
 
-        {error && <p className="text-xs text-red-400">{error}</p>}
+          <div className="mt-6">
+            <label className="mb-1.5 block text-[11px] font-medium tracking-wider text-cream-300">
+              昵称
+            </label>
+            <input
+              value={displayName}
+              onChange={(e) => setDisplayName(e.target.value)}
+              maxLength={40}
+              className="input-warm w-full rounded-2xl px-4 py-3 text-sm text-cream-50 outline-none placeholder:text-cream-300/40"
+              placeholder="给自己起个名字"
+            />
+          </div>
+
+          {error && <p className="mt-4 text-xs text-rose/80">{error}</p>}
+        </div>
 
         <button
           type="submit"
           disabled={saving}
-          className="w-full rounded-xl bg-gradient-to-r from-brand-from to-brand-to py-3 text-sm font-semibold text-white disabled:opacity-50"
+          className="btn-rose w-full rounded-2xl py-3.5 text-sm font-medium tracking-wide text-white"
         >
           {saving ? '保存中…' : '进入 Neosoul'}
         </button>
