@@ -8,14 +8,13 @@ interface Props {
   roomId: string;
 }
 
-// 房主：举手列表（批准上麦）+ 在麦管理（静音 / 请下麦）。PRD §8.4、§10。
+// 房主：举手列表 + 在麦管理。
 export function HostPanel({ roomId }: Props) {
   const participants = useParticipants();
   const raisedHands = useUI((s) => s.raisedHands);
   const removeRaisedHand = useUI((s) => s.removeRaisedHand);
   const [busy, setBusy] = useState<string | null>(null);
 
-  // 在麦上的其他人（canPublish 且非本机）
   const speakers = participants.filter(
     (p) => !p.isLocal && p.permissions?.canPublish,
   );
@@ -40,21 +39,23 @@ export function HostPanel({ roomId }: Props) {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {raisedHands.length > 0 && (
         <section>
-          <h3 className="mb-2 text-xs text-white/50">举手申请</h3>
+          <h3 className="mb-3 text-[11px] font-medium tracking-[0.15em] text-rose-light/80">
+            举手申请
+          </h3>
           <div className="space-y-2">
             {raisedHands.map((h) => (
               <div
                 key={h.identity}
-                className="flex items-center justify-between rounded-xl border border-white/10 bg-black/30 px-3 py-2"
+                className="flex items-center justify-between rounded-2xl border border-rose/10 bg-rose/5 px-3 py-2.5"
               >
-                <span className="truncate text-sm">{h.name}</span>
+                <span className="truncate text-[13px] font-light text-cream-100">{h.name}</span>
                 <button
                   onClick={() => moderate('grant', h.identity)}
                   disabled={busy === `grant:${h.identity}`}
-                  className="rounded-lg bg-gradient-to-r from-brand-from to-brand-to px-3 py-1 text-xs font-semibold disabled:opacity-50"
+                  className="btn-rose rounded-full px-4 py-1.5 text-[11px] font-medium text-white"
                 >
                   批准
                 </button>
@@ -66,26 +67,30 @@ export function HostPanel({ roomId }: Props) {
 
       {speakers.length > 0 && (
         <section>
-          <h3 className="mb-2 text-xs text-white/50">麦上成员</h3>
+          <h3 className="mb-3 text-[11px] font-medium tracking-[0.15em] text-cream-300">
+            麦上成员
+          </h3>
           <div className="space-y-2">
             {speakers.map((p) => (
               <div
                 key={p.identity}
-                className="flex items-center justify-between rounded-xl border border-white/10 bg-black/30 px-3 py-2"
+                className="flex items-center justify-between rounded-2xl border border-white/5 bg-white/3 px-3 py-2.5"
               >
-                <span className="truncate text-sm">{p.name ?? p.identity}</span>
-                <div className="flex gap-2">
+                <span className="truncate text-[13px] font-light text-cream-100">
+                  {p.name ?? p.identity}
+                </span>
+                <div className="flex gap-1.5">
                   <button
                     onClick={() => moderate('mute', p.identity)}
                     disabled={busy === `mute:${p.identity}`}
-                    className="rounded-lg bg-white/10 px-3 py-1 text-xs disabled:opacity-50"
+                    className="rounded-full bg-white/5 px-3 py-1.5 text-[11px] font-light text-cream-200 transition-colors hover:bg-white/8 disabled:opacity-40"
                   >
                     静音
                   </button>
                   <button
                     onClick={() => moderate('remove', p.identity)}
                     disabled={busy === `remove:${p.identity}`}
-                    className="rounded-lg bg-white/10 px-3 py-1 text-xs text-red-300 disabled:opacity-50"
+                    className="rounded-full bg-white/5 px-3 py-1.5 text-[11px] font-light text-rose-light/80 transition-colors hover:bg-rose/10 disabled:opacity-40"
                   >
                     下麦
                   </button>
@@ -97,7 +102,9 @@ export function HostPanel({ roomId }: Props) {
       )}
 
       {raisedHands.length === 0 && speakers.length === 0 && (
-        <p className="text-xs text-white/30">暂无举手或麦上成员。</p>
+        <p className="py-6 text-center text-xs font-light text-cream-300/50">
+          暂无举手或麦上成员
+        </p>
       )}
     </div>
   );

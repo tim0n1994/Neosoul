@@ -5,7 +5,7 @@ import { useParticipants } from '@livekit/components-react';
 import { AvatarOrb } from '@/components/AvatarOrb';
 import { Suspense, useMemo } from 'react';
 
-const THEME_COLOR = '#7c5cff';
+const THEME_COLOR = '#c47b78'; // 暧昧玫瑰金，匹配暖色系
 const INNER_R = 1.6; // 上麦者内圈半径
 const OUTER_R = 3.2; // 听众外圈半径
 
@@ -91,9 +91,9 @@ export function PartyScene() {
         camera={{ position: [0, 3.5, 6], fov: 50 }}
         dpr={[1, 1.5]}
         frameloop="always"
-        style={{ width: '100%', height: '100%', background: 'radial-gradient(circle at 50% 40%, #14142a 0%, #0a0a12 70%)' }}
+        style={{ width: '100%', height: '100%', background: 'transparent' }}
       >
-        <fog attach="fog" args={['#0a0a12', 6, 12]} />
+        <fog attach="fog" args={['#08060a', 5, 11]} />
         <Suspense fallback={null}>
           <SceneContent />
         </Suspense>

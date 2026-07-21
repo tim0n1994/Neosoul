@@ -7,8 +7,8 @@ interface Props {
   className?: string;
 }
 
-// 由 style + seed 直接渲染 <img>（PRD §14）。3D 场景里把同一 dataURI 作纹理。
-export function AvatarImage({ style, seed, size = 40, className }: Props) {
+// 由 style + seed 渲染 <img>（PRD §14）。3D 场景里把同一 dataURI 作纹理。
+export function AvatarImage({ style, seed, size = 36, className }: Props) {
   return (
     // eslint-disable-next-line @next/next/no-img-element
     <img
@@ -17,7 +17,11 @@ export function AvatarImage({ style, seed, size = 40, className }: Props) {
       height={size}
       alt="头像"
       className={className}
-      style={{ borderRadius: '9999px', objectFit: 'cover' }}
+      style={{
+        borderRadius: '9999px',
+        objectFit: 'cover',
+        border: '1px solid rgba(255,255,255,0.06)',
+      }}
     />
   );
 }

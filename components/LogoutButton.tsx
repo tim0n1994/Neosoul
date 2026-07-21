@@ -13,9 +13,9 @@ export function LogoutButton() {
   return (
     <button
       onClick={handleLogout}
-      className="text-xs text-white/40 hover:text-white"
+      className="text-[11px] font-light tracking-wider text-cream-300 transition-colors hover:text-rose-light"
     >
-      退出登录
+      退出
     </button>
   );
 }
