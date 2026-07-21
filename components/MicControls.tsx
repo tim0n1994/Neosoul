@@ -25,19 +25,27 @@ export function MicControls({ isHost, onOpenHostPanel, onToggleChat }: Props) {
 
   async function toggle() {
     const next = !micEnabled;
-    await localParticipant.setMicrophoneEnabled(next);
-    setMicEnabled(next);
+    try {
+      await localParticipant.setMicrophoneEnabled(next);
+      setMicEnabled(next);
+    } catch {
+      // 浏览器拒绝麦克风权限或设备不可用，保持当前状态
+    }
   }
 
   async function raiseHand() {
     const encoder = new TextEncoder();
-    await send(
-      encoder.encode(
-        JSON.stringify({ type: 'raise_hand', name: localParticipant.name }),
-      ),
-      { reliable: true },
-    );
-    setRaised(true);
+    try {
+      await send(
+        encoder.encode(
+          JSON.stringify({ type: 'raise_hand', name: localParticipant.name }),
+        ),
+        { reliable: true },
+      );
+      setRaised(true);
+    } catch {
+      // 连接断开或无 canPublishData，静默失败
+    }
   }
 
   return (

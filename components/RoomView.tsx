@@ -27,16 +27,22 @@ function HostMicSetup({ isHost }: { isHost: boolean }) {
   const connectionState = useConnectionState();
   const { localParticipant } = useLocalParticipant();
   const setMicEnabled = useUI((s) => s.setMicEnabled);
-  const done = useRef(false);
+  const prevConnState = useRef<ConnectionState | null>(null);
 
   useEffect(() => {
-    if (connectionState === ConnectionState.Connected && isHost && !done.current) {
-      done.current = true;
+    // 检测重连：之前已 Connected，中间断开，现在又 Connected
+    const wasConnected = prevConnState.current === ConnectionState.Connected;
+    const justReconnected =
+      wasConnected && connectionState === ConnectionState.Connected;
+
+    if (connectionState === ConnectionState.Connected && isHost) {
       localParticipant
         .setMicrophoneEnabled(true)
         .then(() => setMicEnabled(true))
         .catch(() => {});
     }
+
+    prevConnState.current = connectionState;
   }, [connectionState, isHost, localParticipant, setMicEnabled]);
 
   return null;

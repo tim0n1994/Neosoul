@@ -1,12 +1,13 @@
 'use client';
 
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 
 export function LogoutButton() {
   const router = useRouter();
+  const [supabase] = useState(() => createClient());
   async function handleLogout() {
-    const supabase = createClient();
     await supabase.auth.signOut();
     router.replace('/login');
   }

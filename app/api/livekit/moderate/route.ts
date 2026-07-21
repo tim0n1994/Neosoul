@@ -60,8 +60,13 @@ export async function POST(req: Request) {
         canSubscribe: true,
         canPublishData: true,
       });
-      const sid = await micSidOf(targetIdentity);
-      if (sid) await roomService.mutePublishedTrack(lkRoom, targetIdentity, sid, true);
+      // 权限撤销后 LiveKit 可能已自动取消发布该 track，mute 可能失败，忽略错误
+      try {
+        const sid = await micSidOf(targetIdentity);
+        if (sid) await roomService.mutePublishedTrack(lkRoom, targetIdentity, sid, true);
+      } catch {
+        // track 已不存在，权限撤销本身已生效
+      }
     } else if (action === 'mute') {
       const sid = await micSidOf(targetIdentity);
       if (!sid) {

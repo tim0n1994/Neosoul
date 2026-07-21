@@ -1,12 +1,13 @@
 import { AccessToken, RoomServiceClient } from 'livekit-server-sdk';
 
+const lkUrl = process.env.NEXT_PUBLIC_LIVEKIT_URL ?? '';
 // RoomServiceClient 需要 https host（PRD §5.2 踩坑预警）
-const httpUrl = process.env.NEXT_PUBLIC_LIVEKIT_URL!.replace('wss://', 'https://');
+const httpUrl = lkUrl.replace(/^wss:\/\//, 'https://').replace(/^ws:\/\//, 'http://');
 
 export const roomService = new RoomServiceClient(
   httpUrl,
-  process.env.LIVEKIT_API_KEY!,
-  process.env.LIVEKIT_API_SECRET!,
+  process.env.LIVEKIT_API_KEY ?? '',
+  process.env.LIVEKIT_API_SECRET ?? '',
 );
 
 export async function createToken(opts: {

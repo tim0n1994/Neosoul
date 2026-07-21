@@ -18,8 +18,8 @@ export default async function Page() {
     .eq('id', user.id)
     .maybeSingle();
 
-  // display_name 仍是默认 'Guest' 视为未完成 onboarding（PRD §8）
-  if (!profile || profile.display_name === 'Guest') {
+  // display_name 为空或默认 'Guest' 视为未完成 onboarding（PRD §8）
+  if (!profile || !profile.display_name || profile.display_name === 'Guest') {
     redirect('/onboarding');
   }
 
