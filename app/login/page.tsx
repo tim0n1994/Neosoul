@@ -86,6 +86,11 @@ export default function LoginPage() {
           {!sent ? (
             <>
               <form onSubmit={sendMagicLink} className="space-y-4">
+                <div className="text-center">
+                  <p className="text-[11px] font-light text-cream-300/60">
+                    输入邮箱即可登录或注册
+                  </p>
+                </div>
                 <div>
                   <label className="mb-1.5 block text-[11px] font-medium tracking-wider text-cream-300">
                     {t('email')}
@@ -106,7 +111,7 @@ export default function LoginPage() {
                   disabled={loading}
                   className="btn-rose w-full rounded-2xl py-3 text-sm font-medium tracking-wide text-white"
                 >
-                  {loading ? tc('loading') : t('sendCode')}
+                  {loading ? tc('loading') : '发送登录链接'}
                 </button>
               </form>
 
@@ -152,12 +157,12 @@ export default function LoginPage() {
                 <span className="text-2xl">📧</span>
               </div>
               <div>
-                <p className="text-sm font-light text-cream-100">验证邮件已发送至</p>
+                <p className="text-sm font-light text-cream-100">登录链接已发送至</p>
                 <p className="mt-1 text-base font-medium text-cream-50">{email}</p>
               </div>
               <p className="text-xs leading-relaxed text-cream-300/60">
-                点击邮件中的「确认注册」按钮即可登录。<br />
-                链接将跳转回 NEOSOUL 完成验证。
+                点击邮件中的按钮即可登录或完成注册。<br />
+                链接将跳转回 NEOSOUL。
               </p>
               {error && <p className="text-xs text-rose/80">{error}</p>}
               <button
