@@ -23,6 +23,7 @@ export function MicControls({ isHost, role, onOpenHostPanel, onToggleChat }: Pro
   const permissions = useLocalParticipantPermissions();
   const micEnabled = useUI((s) => s.micEnabled);
   const setMicEnabled = useUI((s) => s.setMicEnabled);
+  const raisedHands = useUI((s) => s.raisedHands);
   const { send } = useDataChannel('raise_hand');
   const [raised, setRaised] = useState(false);
 
@@ -93,9 +94,15 @@ export function MicControls({ isHost, role, onOpenHostPanel, onToggleChat }: Pro
         {(role === 'host' || role === 'cohost') && onOpenHostPanel && (
           <button
             onClick={onOpenHostPanel}
-            className="flex h-11 w-11 items-center justify-center rounded-full bg-white/5 text-base text-cream-200 transition-colors hover:bg-white/8"
+            className="relative flex h-11 w-11 items-center justify-center rounded-full bg-white/5 text-lg text-cream-200 transition-colors hover:bg-white/8"
           >
             ⚙
+            {raisedHands.length > 0 && (
+              <span className="absolute -right-0.5 -top-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-rose px-1 text-[10px] font-bold text-white">
+                {raisedHands.length}
+                <span className="absolute inset-0 animate-ping rounded-full bg-rose/40" />
+              </span>
+            )}
           </button>
         )}
 

@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
+import { useWakeLock } from '@/lib/useWakeLock';
 import {
   LiveKitRoom,
   RoomAudioRenderer,
@@ -95,6 +96,9 @@ export function RoomView({
 
   // host/cohost 可开管麦面板
   const canModerate = role === 'host' || role === 'cohost';
+
+  // PRD §6.12：进房后保持屏幕常亮，防止手机息屏断开音频
+  useWakeLock(entered);
 
   useEffect(() => {
     let cancelled = false;
