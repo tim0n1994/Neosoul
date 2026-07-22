@@ -1,0 +1,93 @@
+{
+  "common": {
+    "appName": "NEOSOUL",
+    "tagline": "有 Soul 的灵魂，没有 Soul 的套路",
+    "loading": "连接中…",
+    "retry": "重试",
+    "cancel": "取消",
+    "save": "保存",
+    "create": "创建",
+    "leave": "离开",
+    "close": "关闭",
+    "back": "返回"
+  },
+  "nav": {
+    "discover": "发现",
+    "rooms": "房间",
+    "meet": "遇见",
+    "profile": "主页",
+    "settings": "设置"
+  },
+  "auth": {
+    "login": "登录",
+    "email": "邮箱",
+    "sendCode": "发送验证码",
+    "enterCode": "输入验证码",
+    "verify": "验证",
+    "logout": "退出登录"
+  },
+  "onboarding": {
+    "title": "完善你的形象",
+    "subtitle": "选一个属于你的头像",
+    "nickname": "昵称",
+    "nicknamePlaceholder": "给自己起个名字",
+    "enter": "进入 NEOSOUL"
+  },
+  "room": {
+    "create": "创建房间",
+    "roomName": "房间名称",
+    "roomNamePlaceholder": "给这场派对起个名字",
+    "roomBackground": "房间背景（可选）",
+    "selectBg": "选择一张背景图",
+    "enterRoom": "进入房间",
+    "enterHint": "点击进入，记得打开麦克风",
+    "leaveQuietly": "安静离场",
+    "host": "房主",
+    "cohost": "共主持",
+    "speaker": "发言者",
+    "audience": "听众",
+    "raisedHand": "举手",
+    "approve": "批准",
+    "mute": "静音",
+    "demote": "下麦",
+    "kick": "踢出",
+    "ban": "封禁",
+    "promoteCohost": "设为共主持",
+    "demoteCohost": "取消共主持",
+    "pin": "置顶",
+    "unpin": "取消置顶",
+    "recording": "录制",
+    "startRecording": "开始录制",
+    "stopRecording": "停止录制",
+    "recordingActive": "本房正在录制",
+    "activity": "活动",
+    "participantCount": "{count} 人在场",
+    "noMicTrack": "无麦克风轨道",
+    "notFound": "房间不存在或已结束",
+    "manage": "房间管理"
+  },
+  "chat": {
+    "title": "公屏",
+    "placeholder": "说点什么…",
+    "empty": "还没有消息，说点什么吧",
+    "imageOnly": "仅支持图片",
+    "imageTooLarge": "图片不能超过 5MB",
+    "sendFailed": "发送失败"
+  },
+  "safety": {
+    "report": "举报",
+    "block": "拉黑",
+    "reportReason": "举报理由",
+    "reportNote": "备注（可选）",
+    "antiFraud": "警惕转账/投资/线下诱导",
+    "consentRequired": "请先同意服务条款",
+    "minorProtected": "未成年保护模式已开启"
+  },
+  "errors": {
+    "unauthorized": "请先登录",
+    "forbidden": "无权限",
+    "notFound": "未找到",
+    "rateLimited": "操作过于频繁，请稍后再试",
+    "serverError": "服务器错误"
+  }
+}

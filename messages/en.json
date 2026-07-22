@@ -1,0 +1,93 @@
+{
+  "common": {
+    "appName": "NEOSOUL",
+    "tagline": "Soul with soul, without the tricks",
+    "loading": "Connecting…",
+    "retry": "Retry",
+    "cancel": "Cancel",
+    "save": "Save",
+    "create": "Create",
+    "leave": "Leave",
+    "close": "Close",
+    "back": "Back"
+  },
+  "nav": {
+    "discover": "Discover",
+    "rooms": "Rooms",
+    "meet": "Meet",
+    "profile": "Profile",
+    "settings": "Settings"
+  },
+  "auth": {
+    "login": "Log in",
+    "email": "Email",
+    "sendCode": "Send code",
+    "enterCode": "Enter code",
+    "verify": "Verify",
+    "logout": "Log out"
+  },
+  "onboarding": {
+    "title": "Set up your avatar",
+    "subtitle": "Pick an avatar that's yours",
+    "nickname": "Nickname",
+    "nicknamePlaceholder": "Choose a name",
+    "enter": "Enter NEOSOUL"
+  },
+  "room": {
+    "create": "Create room",
+    "roomName": "Room name",
+    "roomNamePlaceholder": "Name this party",
+    "roomBackground": "Room background (optional)",
+    "selectBg": "Choose a background image",
+    "enterRoom": "Enter room",
+    "enterHint": "Tap to enter — have your mic ready",
+    "leaveQuietly": "Leave quietly",
+    "host": "Host",
+    "cohost": "Co-host",
+    "speaker": "Speaker",
+    "audience": "Audience",
+    "raisedHand": "Raise hand",
+    "approve": "Approve",
+    "mute": "Mute",
+    "demote": "Remove from stage",
+    "kick": "Kick",
+    "ban": "Ban",
+    "promoteCohost": "Make co-host",
+    "demoteCohost": "Remove co-host",
+    "pin": "Pin",
+    "unpin": "Unpin",
+    "recording": "Recording",
+    "startRecording": "Start recording",
+    "stopRecording": "Stop recording",
+    "recordingActive": "This room is being recorded",
+    "activity": "Activity",
+    "participantCount": "{count} present",
+    "noMicTrack": "No microphone track",
+    "notFound": "Room not found or ended",
+    "manage": "Room management"
+  },
+  "chat": {
+    "title": "Chat",
+    "placeholder": "Say something…",
+    "empty": "No messages yet — start the conversation",
+    "imageOnly": "Images only",
+    "imageTooLarge": "Image must be under 5MB",
+    "sendFailed": "Failed to send"
+  },
+  "safety": {
+    "report": "Report",
+    "block": "Block",
+    "reportReason": "Reason",
+    "reportNote": "Note (optional)",
+    "antiFraud": "Beware of money transfers / investments / offline meetings",
+    "consentRequired": "Please accept the Terms first",
+    "minorProtected": "Minor protection mode is on"
+  },
+  "errors": {
+    "unauthorized": "Please log in",
+    "forbidden": "Forbidden",
+    "notFound": "Not found",
+    "rateLimited": "Too many requests — please slow down",
+    "serverError": "Server error"
+  }
+}
