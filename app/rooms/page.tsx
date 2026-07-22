@@ -50,6 +50,8 @@ export default async function RoomsPage() {
         name={me.display_name}
         style={me.avatar_style}
         seed={me.avatar_seed}
+        avatarType={me.avatar_type}
+        email={user.email}
         right={<CreateRoomButton />}
       />
 
