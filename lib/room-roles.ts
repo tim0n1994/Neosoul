@@ -33,7 +33,8 @@ export type ModerateAction =
   | 'demote_cohost'
   | 'delete_message'
   | 'pin'
-  | 'unpin';
+  | 'unpin'
+  | 'toggle_recording';
 
 /** 判断调用者是否可执行某操作 */
 export function canPerform(

@@ -27,6 +27,10 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'name required' }, { status: 400 });
   }
 
+  // PRD §6.2 私密房自动生成 invite_code
+  const visibility = body.visibility ?? 'open';
+  const inviteCode = visibility === 'private' ? crypto.randomUUID().slice(0, 8) : null;
+
   const { data, error } = await supabase
     .from('rooms')
     .insert({
@@ -35,7 +39,8 @@ export async function POST(req: Request) {
       livekit_room: 'room_' + crypto.randomUUID(),
       background_url: body.backgroundUrl ?? null,
       topic: body.topic ?? 'chat',
-      visibility: body.visibility ?? 'open',
+      visibility,
+      invite_code: inviteCode,
     })
     .select('id')
     .single();

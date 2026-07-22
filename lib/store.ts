@@ -17,6 +17,9 @@ interface UIState {
   // v2：录制状态提示
   recordingActive: boolean;
   setRecordingActive: (v: boolean) => void;
+  // v2 §6.12：Lite 模式（2D 降级）
+  liteMode: boolean;
+  setLiteMode: (v: boolean) => void;
 }
 
 export const useUI = create<UIState>((set) => ({
@@ -35,4 +38,6 @@ export const useUI = create<UIState>((set) => ({
   toggleChat: () => set((s) => ({ chatOpen: !s.chatOpen })),
   recordingActive: false,
   setRecordingActive: (recordingActive) => set({ recordingActive }),
+  liteMode: false,
+  setLiteMode: (liteMode) => set({ liteMode }),
 }));

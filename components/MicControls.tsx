@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import {
   useDataChannel,
   useLocalParticipant,
@@ -16,6 +17,7 @@ interface Props {
 
 // 底部麦控（玻璃浮岛）。
 export function MicControls({ isHost, role, onOpenHostPanel, onToggleChat }: Props) {
+  const t = useTranslations('room');
   const { localParticipant } = useLocalParticipant();
   const micEnabled = useUI((s) => s.micEnabled);
   const setMicEnabled = useUI((s) => s.setMicEnabled);

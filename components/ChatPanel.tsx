@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { createClient } from '@/lib/supabase/client';
 import { AvatarImage } from '@/components/AvatarImage';
 
@@ -30,6 +31,7 @@ const MAX_TEXT = 500;
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 
 export function ChatPanel({ roomId, myRole, myUserId }: Props) {
+  const t = useTranslations('chat');
   const [supabase] = useState(() => createClient());
   const [messages, setMessages] = useState<Message[]>([]);
   const [senders, setSenders] = useState<Record<string, Sender>>({});
@@ -245,14 +247,14 @@ export function ChatPanel({ roomId, myRole, myUserId }: Props) {
     <div className="flex h-full flex-col">
       {/* 标题 */}
       <div className="border-b border-white/5 px-5 py-3">
-        <span className="text-[11px] font-light tracking-[0.2em] text-cream-300">公屏</span>
+        <span className="text-[11px] font-light tracking-[0.2em] text-cream-300">{t('title')}</span>
       </div>
 
       {/* 消息流 */}
       <div className="flex-1 space-y-4 overflow-y-auto px-4 py-4">
         {messages.length === 0 && (
           <p className="pt-8 text-center text-xs font-light text-cream-300/50">
-            还没有消息，说点什么吧
+            {t('empty')}
           </p>
         )}
         {messages.map((m) => {
@@ -312,7 +314,7 @@ export function ChatPanel({ roomId, myRole, myUserId }: Props) {
           value={text}
           onChange={(e) => setText(e.target.value)}
           maxLength={MAX_TEXT}
-          placeholder="说点什么…"
+          placeholder={t('placeholder')}
           className="input-warm flex-1 rounded-full px-4 py-2 text-[13px] font-light text-cream-50 outline-none placeholder:text-cream-300/40"
         />
         <button

@@ -2,15 +2,20 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { createClient } from '@/lib/supabase/client';
 
 // 「+ 创建房间」：房名 + 可选背景图 → insert rooms → 跳房
 export function CreateRoomButton() {
   const router = useRouter();
+  const t = useTranslations('room');
+  const tc = useTranslations('common');
   const [supabase] = useState(() => createClient());
 
   const [open, setOpen] = useState(false);
   const [name, setName] = useState('');
+  const [topic, setTopic] = useState('chat');
+  const [visibility, setVisibility] = useState('open');
   const [bgPreview, setBgPreview] = useState<string | null>(null);
   const [bgPath, setBgPath] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
@@ -72,7 +77,7 @@ export function CreateRoomButton() {
     const res = await fetch('/api/rooms', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: roomName, backgroundUrl: bgPath }),
+      body: JSON.stringify({ name: roomName, backgroundUrl: bgPath, topic, visibility }),
     });
     const data = res.ok ? await res.json() : null;
     setBusy(false);
@@ -84,6 +89,8 @@ export function CreateRoomButton() {
     }
     setOpen(false);
     setName('');
+    setTopic('chat');
+    setVisibility('open');
     setBgPreview(null);
     setBgPath(null);
     router.push(`/rooms/${data.id}`);
@@ -95,7 +102,7 @@ export function CreateRoomButton() {
         onClick={() => setOpen(true)}
         className="btn-rose rounded-full px-4 py-2 text-xs font-medium tracking-wide text-white"
       >
-        + 创建房间
+        + {t('create')}
       </button>
 
       {open && (
@@ -108,25 +115,83 @@ export function CreateRoomButton() {
             onSubmit={handleCreate}
             className="glass-strong w-full max-w-sm space-y-5 rounded-t-3xl p-6 sm:rounded-3xl"
           >
-            <h2 className="text-lg font-light tracking-wide text-cream-50">创建房间</h2>
+            <h2 className="text-lg font-light tracking-wide text-cream-50">{t('create')}</h2>
 
             <div>
               <label className="mb-1.5 block text-[11px] font-medium tracking-wider text-cream-300">
-                房间名称
+                {t('roomName')}
               </label>
               <input
                 autoFocus
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 maxLength={40}
-                placeholder="给这场派对起个名字"
+                placeholder={t('roomNamePlaceholder')}
                 className="input-warm w-full rounded-2xl px-4 py-3 text-sm text-cream-50 outline-none placeholder:text-cream-300/40"
               />
             </div>
 
+            {/* PRD §6.2 主题选择 */}
             <div>
               <label className="mb-1.5 block text-[11px] font-medium tracking-wider text-cream-300">
-                房间背景 <span className="text-cream-300/50">（可选）</span>
+                {t('topic')}
+              </label>
+              <div className="flex flex-wrap gap-1.5">
+                {[
+                  { v: 'chat', l: '闲聊' }, { v: 'treehole', l: '树洞' },
+                  { v: 'study', l: '学习' }, { v: 'karaoke', l: 'K歌' },
+                  { v: 'game', l: '游戏' }, { v: 'reading', l: '读书' },
+                  { v: 'emotion', l: '情感' }, { v: 'career', l: '职场' },
+                  { v: 'other', l: '其它' },
+                ].map((t) => (
+                  <button
+                    key={t.v}
+                    type="button"
+                    onClick={() => setTopic(t.v)}
+                    className={
+                      'rounded-full px-3 py-1.5 text-[11px] font-light transition-all ' +
+                      (topic === t.v
+                        ? 'bg-rose/15 text-rose-light ring-1 ring-rose/20'
+                        : 'border border-white/5 text-cream-300 hover:border-white/10')
+                    }
+                  >
+                    {t.l}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* PRD §6.2 可见性选择 */}
+            <div>
+              <label className="mb-1.5 block text-[11px] font-medium tracking-wider text-cream-300">
+                {t('visibility')}
+              </label>
+              <div className="flex gap-1.5">
+                {[
+                  { v: 'open', l: '🌍 公开' },
+                  { v: 'followers', l: '👥 关注者' },
+                  { v: 'private', l: '🔒 私密' },
+                ].map((v) => (
+                  <button
+                    key={v.v}
+                    type="button"
+                    onClick={() => setVisibility(v.v)}
+                    className={
+                      'flex-1 rounded-2xl px-3 py-2.5 text-[11px] font-light transition-all ' +
+                      (visibility === v.v
+                        ? 'bg-rose/15 text-rose-light ring-1 ring-rose/20'
+                        : 'border border-white/5 text-cream-300 hover:border-white/10')
+                    }
+                  >
+                    {v.l}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="mb-1.5 block text-[11px] font-medium tracking-wider text-cream-300">
+                {t('roomBackground')} <span className="text-cream-300/50">（可选）</span>
               </label>
               <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleBgSelect} />
               {bgPreview ? (
@@ -169,7 +234,7 @@ export function CreateRoomButton() {
                 disabled={busy}
                 className="btn-rose flex-1 rounded-2xl py-3 text-sm font-medium text-white"
               >
-                {busy ? '创建中…' : '创建'}
+                {busy ? tc('loading') : tc('create')}
               </button>
             </div>
           </form>

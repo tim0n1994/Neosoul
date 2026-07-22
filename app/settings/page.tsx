@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { getEntitlements } from '@/lib/stripe';
 import { SubscribeButton } from '@/components/SubscribeButton';
 import { ConsentGate } from '@/components/safety/ConsentGate';
+import { PushSettings } from '@/components/PushSettings';
 
 // PRD §6.11 订阅/装扮/账户设置。
 export default async function SettingsPage({
@@ -91,6 +92,15 @@ export default async function SettingsPage({
                 : '未同意'}
             </p>
           </div>
+        </div>
+
+        {/* PRD §6.12 通知设置 */}
+        <div className="glass rounded-3xl p-6">
+          <h2 className="mb-3 text-base font-medium text-cream-50">通知</h2>
+          <p className="mb-3 text-[12px] font-light text-cream-300/60">
+            开启推送通知，关注对象开播或被 ping 时提醒你
+          </p>
+          <PushSettings />
         </div>
 
         {/* 法律链接 */}
