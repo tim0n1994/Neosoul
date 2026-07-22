@@ -23,5 +23,5 @@ export default async function Page() {
     redirect('/onboarding');
   }
 
-  redirect('/rooms');
+  redirect('/discover');
 }

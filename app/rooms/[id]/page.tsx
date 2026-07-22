@@ -1,10 +1,47 @@
 import { redirect } from 'next/navigation';
+import type { Metadata } from 'next';
 import { createClient } from '@/lib/supabase/server';
 import { createAdmin } from '@/lib/supabase/admin';
 import { RoomView } from '@/components/RoomView';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { resolveRole } from '@/lib/room-roles';
 import Link from 'next/link';
+
+// PRD §6.6 分享短链 + OG 卡片——Web 的拉新优势。
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  const admin = createAdmin();
+  const { data: room } = await admin
+    .from('rooms')
+    .select('name, topic, participant_count, background_url')
+    .eq('id', id)
+    .maybeSingle();
+  if (!room) {
+    return { title: '房间不存在 — NEOSOUL' };
+  }
+  const title = `${room.name} — NEOSOUL`;
+  const description = `${room.participant_count ?? 0} 人在场 · ${room.topic}`;
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: 'website',
+      images: room.background_url ? [{ url: room.background_url }] : undefined,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: room.background_url ? [room.background_url] : undefined,
+    },
+  };
+}
 
 export default async function RoomPage({
   params,
