@@ -15,6 +15,7 @@ export default function OnboardingPage() {
   const [displayName, setDisplayName] = useState('');
   const [style, setStyle] = useState('thumbs');
   const [seed, setSeed] = useState('neo');
+  const [avatarType, setAvatarType] = useState('dicebear');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -31,13 +32,14 @@ export default function OnboardingPage() {
         setUserId(user.id);
         const { data: profile } = await supabase
           .from('profiles')
-          .select('display_name, avatar_style, avatar_seed')
+          .select('display_name, avatar_style, avatar_seed, avatar_type')
           .eq('id', user.id)
           .maybeSingle();
         if (profile) {
           setDisplayName(!profile.display_name || profile.display_name === 'Guest' ? '' : profile.display_name);
           setStyle(profile.avatar_style ?? 'thumbs');
           setSeed(profile.avatar_seed ?? randomSeed());
+          setAvatarType(profile.avatar_type ?? 'dicebear');
         }
       } catch {
         setError('加载失败，请刷新重试');
@@ -53,7 +55,7 @@ export default function OnboardingPage() {
     setSaving(true);
     const { error } = await supabase
       .from('profiles')
-      .update({ display_name: name, avatar_style: style, avatar_seed: seed })
+      .update({ display_name: name, avatar_style: style, avatar_seed: seed, avatar_type: avatarType })
       .eq('id', userId);
     setSaving(false);
     if (error) {
@@ -86,9 +88,12 @@ export default function OnboardingPage() {
           <AvatarPicker
             style={style}
             seed={seed}
+            avatarType={avatarType}
+            userId={userId!}
             onChange={(next) => {
               setStyle(next.style);
               setSeed(next.seed);
+              setAvatarType(next.avatarType);
             }}
           />
 

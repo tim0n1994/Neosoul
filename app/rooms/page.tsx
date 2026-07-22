@@ -9,6 +9,7 @@ type Host = {
   display_name: string;
   avatar_style: string;
   avatar_seed: string;
+  avatar_type: string;
 } | null;
 
 type Room = {
@@ -28,7 +29,7 @@ export default async function RoomsPage() {
 
   const { data: me } = await supabase
     .from('profiles')
-    .select('display_name, avatar_style, avatar_seed')
+    .select('display_name, avatar_style, avatar_seed, avatar_type')
     .eq('id', user.id)
     .maybeSingle();
   if (!me || me.display_name === 'Guest') redirect('/onboarding');
@@ -36,7 +37,7 @@ export default async function RoomsPage() {
   const { data: rooms } = await supabase
     .from('rooms')
     .select(
-      'id, name, background_url, created_at, host:profiles!host_id(display_name, avatar_style, avatar_seed)',
+      'id, name, background_url, created_at, host:profiles!host_id(display_name, avatar_style, avatar_seed, avatar_type)',
     )
     .eq('is_live', true)
     .order('created_at', { ascending: false });
@@ -108,6 +109,7 @@ export default async function RoomsPage() {
                         <AvatarImage
                           style={room.host.avatar_style}
                           seed={room.host.avatar_seed}
+                          avatarType={room.host.avatar_type}
                           size={18}
                         />
                         <span className="truncate text-[11px] font-light text-cream-200/70">
