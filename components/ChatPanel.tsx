@@ -84,38 +84,37 @@ export function ChatPanel({ roomId, myRole, myUserId }: Props) {
       .channel(`room:${roomId}`)
       .on(
         'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'messages', filter: `room_id=eq.${roomId}` },
+        { event: '*', schema: 'public', table: 'messages', filter: `room_id=eq.${roomId}` },
         async (payload) => {
-          const msg = payload.new as Message;
-          setMessages((prev) => [...prev, msg]);
-          if (!sendersRef.current[msg.sender_id]) {
-            const { data: prof } = await supabase
-              .from('profiles')
-              .select('display_name, avatar_style, avatar_seed')
-              .eq('id', msg.sender_id)
-              .maybeSingle();
-            if (prof) {
-              setSenders((prev) => ({
-                ...prev,
-                [msg.sender_id]: {
-                  display_name: prof.display_name,
-                  avatar_style: prof.avatar_style,
-                  avatar_seed: prof.avatar_seed,
-                },
-              }));
+          // INSERT → 追加新消息
+          if (payload.eventType === 'INSERT') {
+            const msg = payload.new as Message;
+            setMessages((prev) => [...prev, msg]);
+            if (!sendersRef.current[msg.sender_id]) {
+              const { data: prof } = await supabase
+                .from('profiles')
+                .select('display_name, avatar_style, avatar_seed')
+                .eq('id', msg.sender_id)
+                .maybeSingle();
+              if (prof) {
+                setSenders((prev) => ({
+                  ...prev,
+                  [msg.sender_id]: {
+                    display_name: prof.display_name,
+                    avatar_style: prof.avatar_style,
+                    avatar_seed: prof.avatar_seed,
+                  },
+                }));
+              }
             }
           }
-        },
-      )
-      // PRD §6.3：监听消息软删（UPDATE deleted_at）→ 实时隐藏
-      .on(
-        'postgres_changes',
-        { event: 'UPDATE', schema: 'public', table: 'messages', filter: `room_id=eq.${roomId}` },
-        (payload) => {
-          const updated = payload.new as Message;
-          setMessages((prev) =>
-            prev.map((m) => (m.id === updated.id ? { ...m, deleted_at: updated.deleted_at } : m)),
-          );
+          // UPDATE → 软删实时隐藏 (PRD §6.3)
+          if (payload.eventType === 'UPDATE') {
+            const updated = payload.new as Message;
+            setMessages((prev) =>
+              prev.map((m) => (m.id === updated.id ? { ...m, deleted_at: updated.deleted_at } : m)),
+            );
+          }
         },
       )
       .subscribe();
