@@ -119,4 +119,46 @@
   .text-balance {
     text-wrap: balance;
   }
+
+  /* 法律/文档页排版 */
+  .prose-warm {
+    color: #e8e0d8;
+    font-weight: 300;
+    line-height: 1.8;
+  }
+  .prose-warm h1 {
+    font-size: 1.75rem;
+    font-weight: 400;
+    color: #f5efe9;
+    margin-bottom: 0.5rem;
+  }
+  .prose-warm h2 {
+    font-size: 1.15rem;
+    font-weight: 500;
+    color: #d9a29a;
+    margin-top: 2rem;
+    margin-bottom: 0.75rem;
+  }
+  .prose-warm p {
+    font-size: 0.875rem;
+    color: #c0b5ac;
+    margin-bottom: 0.75rem;
+  }
+  .prose-warm ul, .prose-warm ol {
+    font-size: 0.875rem;
+    color: #c0b5ac;
+    margin-bottom: 0.75rem;
+    padding-left: 1.5rem;
+  }
+  .prose-warm li {
+    margin-bottom: 0.35rem;
+  }
+  .prose-warm .lead {
+    font-size: 1rem;
+    color: #e8e0d8;
+  }
+  .prose-warm strong {
+    font-weight: 500;
+    color: #f5efe9;
+  }
 }

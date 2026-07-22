@@ -136,6 +136,25 @@ export function ChatPanel({ roomId, myRole, myUserId }: Props) {
     } = await supabase.auth.getUser();
     if (!user) return;
     setBusy(true);
+
+    // PRD §6.10 [红线]：文本审核——入库前过审
+    try {
+      const modRes = await fetch('/api/moderate/text', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: body }),
+      });
+      if (modRes.ok) {
+        const mod = await modRes.json();
+        if (!mod.allowed) {
+          setBusy(false);
+          alert('消息包含不当内容，已被拦截');
+          return;
+        }
+      }
+    } catch {
+      // 审核服务不可用时不阻断（降级策略）
+    }
     setText('');
     const { error } = await supabase.from('messages').insert({
       room_id: roomId,
