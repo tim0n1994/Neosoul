@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { TopBar } from '@/components/TopBar';
 import { AvatarImage } from '@/components/AvatarImage';
 import { CreateRoomButton } from '@/components/CreateRoomButton';
+import { ConsentGate } from '@/components/safety/ConsentGate';
 import Link from 'next/link';
 
 type Host = {
@@ -29,7 +30,7 @@ export default async function RoomsPage() {
 
   const { data: me } = await supabase
     .from('profiles')
-    .select('display_name, avatar_style, avatar_seed, avatar_type')
+    .select('display_name, avatar_style, avatar_seed, avatar_type, tos_accepted_at, is_minor')
     .eq('id', user.id)
     .maybeSingle();
   if (!me || me.display_name === 'Guest') redirect('/onboarding');
@@ -46,6 +47,8 @@ export default async function RoomsPage() {
 
   return (
     <div className="min-h-[100dvh]">
+      {/* PRD §6.1 [红线] 同意门——未同意条款则拦截 */}
+      {!me.tos_accepted_at && <ConsentGate userId={user.id} />}
       <TopBar
         name={me.display_name}
         style={me.avatar_style}
