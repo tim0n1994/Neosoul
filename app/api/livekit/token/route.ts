@@ -34,13 +34,13 @@ export async function POST(req: Request) {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('display_name, avatar_style, avatar_seed')
+    .select('display_name, avatar_style, avatar_seed, avatar_type')
     .eq('id', user.id)
     .maybeSingle();
 
   const isHost = room.host_id === user.id;
   const metadata = JSON.stringify({
-    style: profile?.avatar_style ?? 'thumbs',
+    style: profile?.avatar_type === 'custom' ? 'custom' : (profile?.avatar_style ?? 'thumbs'),
     seed: profile?.avatar_seed ?? 'neo',
     isHost,
     raised: false,

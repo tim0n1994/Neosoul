@@ -21,3 +21,14 @@ export function avatarDataUri(style: string, seed: string): string {
 export function randomSeed(): string {
   return Math.random().toString(36).slice(2, 10);
 }
+
+export function resolveAvatarSrc(
+  avatarType: string | null | undefined,
+  style: string,
+  seed: string,
+): string {
+  if (avatarType === 'custom' && seed.startsWith('http')) {
+    return seed;
+  }
+  return avatarDataUri(style, seed);
+}

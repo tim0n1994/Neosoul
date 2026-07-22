@@ -30,8 +30,12 @@ export function AvatarOrb({
 }: Props) {
   const meshRef = useRef<THREE.Mesh>(null);
   const ringRef = useRef<THREE.Mesh>(null);
-  const dataUri = useMemo(() => avatarDataUri(style, seed), [style, seed]);
-  const texture = useTexture(dataUri);
+  // custom avatar loads URL, DiceBear uses dataUri
+  const src = useMemo(() => {
+    if (style === 'custom' && seed.startsWith('http')) return seed;
+    return avatarDataUri(style, seed);
+  }, [style, seed]);
+  const texture = useTexture(src);
   const emissive = useMemo(() => new THREE.Color(themeColor), [themeColor]);
 
   // 随机相位，错开浮动节奏
