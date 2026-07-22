@@ -52,6 +52,7 @@ const config: Config = {
       animation: {
         'fade-in': 'fadeIn 0.6s ease-out',
         'glow-pulse': 'glowPulse 3s ease-in-out infinite',
+        'float-up': 'floatUp 3s ease-out forwards',
       },
       keyframes: {
         fadeIn: {
@@ -61,6 +62,11 @@ const config: Config = {
         glowPulse: {
           '0%, 100%': { opacity: '0.3' },
           '50%': { opacity: '0.6' },
+        },
+        floatUp: {
+          '0%': { opacity: '0', transform: 'translateY(0) scale(0.5)' },
+          '15%': { opacity: '1', transform: 'translateY(-20px) scale(1.2)' },
+          '100%': { opacity: '0', transform: 'translateY(-200px) scale(1)' },
         },
       },
     },

@@ -14,6 +14,9 @@ interface UIState {
   setMicEnabled: (v: boolean) => void;
   chatOpen: boolean;
   toggleChat: () => void; // 移动端抽屉
+  // v2：录制状态提示
+  recordingActive: boolean;
+  setRecordingActive: (v: boolean) => void;
 }
 
 export const useUI = create<UIState>((set) => ({
@@ -30,4 +33,6 @@ export const useUI = create<UIState>((set) => ({
   setMicEnabled: (micEnabled) => set({ micEnabled }),
   chatOpen: false,
   toggleChat: () => set((s) => ({ chatOpen: !s.chatOpen })),
+  recordingActive: false,
+  setRecordingActive: (recordingActive) => set({ recordingActive }),
 }));
