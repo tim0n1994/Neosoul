@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import {
   LiveKitRoom,
   RoomAudioRenderer,
@@ -13,10 +14,12 @@ import { MicControls } from '@/components/MicControls';
 import { HostPanel } from '@/components/HostPanel';
 import { ChatPanel } from '@/components/ChatPanel';
 import { PartyScene } from '@/components/PartyScene';
+import { LiteGrid } from '@/components/room/LiteGrid';
 import { RoomEventHandlers } from '@/components/RoomEventHandlers';
 import { Reactions } from '@/components/room/Reactions';
 import { PinnedBar } from '@/components/room/PinnedBar';
 import { ActivityHost } from '@/components/room/ActivityHost';
+import { PresenceList } from '@/components/room/PresenceList';
 import { useUI } from '@/lib/store';
 
 interface Props {
@@ -67,6 +70,8 @@ export function RoomView({
   cohostIds,
   recordingEnabled,
 }: Props) {
+  const t = useTranslations('room');
+  const tc = useTranslations('common');
   const [token, setToken] = useState<string | null>(null);
   const [url, setUrl] = useState('');
   const [entered, setEntered] = useState(false);
@@ -74,6 +79,19 @@ export function RoomView({
   const [hostPanelOpen, setHostPanelOpen] = useState(false);
   const chatOpen = useUI((s) => s.chatOpen);
   const toggleChat = useUI((s) => s.toggleChat);
+
+  // PRD §6.12 Lite 模式：低端设备/弱网/prefers-reduced-motion 用 2D 降级
+  const [liteMode, setLiteMode] = useState(false);
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const lowCPU = (navigator.hardwareConcurrency ?? 8) <= 4;
+    const conn = (navigator as Navigator & { connection?: { effectiveType?: string } }).connection;
+    const slowNet = conn?.effectiveType === '2g' || conn?.effectiveType === 'slow-2g';
+    if (reduceMotion || lowCPU || slowNet) {
+      setLiteMode(true);
+    }
+  }, []);
 
   // host/cohost 可开管麦面板
   const canModerate = role === 'host' || role === 'cohost';
@@ -147,12 +165,12 @@ export function RoomView({
       <div className="absolute left-0 right-0 top-0 z-30 flex items-center justify-between p-4">
         <div className="glass flex items-center gap-2 rounded-full px-4 py-1.5">
           <span className="text-sm font-light text-cream-50">{roomName}</span>
-          {role === 'host' && <span className="text-[10px] font-medium tracking-wider text-rose-light">房主</span>}
-          {role === 'cohost' && <span className="text-[10px] font-medium tracking-wider text-gold/80">共主持</span>}
+          {role === 'host' && <span className="text-[10px] font-medium tracking-wider text-rose-light">{t('host')}</span>}
+          {role === 'cohost' && <span className="text-[10px] font-medium tracking-wider text-gold/80">{t('cohost')}</span>}
           {recordingEnabled && (
             <span className="flex items-center gap-1 rounded-full bg-rose/15 px-2 py-0.5 text-[9px] font-medium text-rose-light">
               <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-rose" />
-              录制中
+              {t('recording')}
             </span>
           )}
         </div>
@@ -160,7 +178,7 @@ export function RoomView({
           href="/rooms"
           className="glass rounded-full px-4 py-1.5 text-xs font-light text-cream-200 transition-colors hover:text-cream-50"
         >
-          离开
+          {tc('leave')}
         </Link>
       </div>
 
@@ -173,9 +191,9 @@ export function RoomView({
           audio={false}
           video={false}
         >
-          {/* 3D 场景 */}
+          {/* 场景：低端走 2D Lite，其余走 3D (PRD §6.12) */}
           <div className="absolute inset-0 z-10 md:right-[340px]" style={{ height: '100%' }}>
-            <PartyScene />
+            {liteMode ? <LiteGrid /> : <PartyScene />}
           </div>
 
           <RoomAudioRenderer />
@@ -238,14 +256,18 @@ export function RoomView({
                     关闭
                   </button>
                 </div>
-                <HostPanel roomId={roomId} myRole={role as 'host' | 'cohost'} hostId={hostId} cohostIds={cohostIds} />
+                <HostPanel roomId={roomId} myRole={role as 'host' | 'cohost'} hostId={hostId} cohostIds={cohostIds} recordingEnabled={recordingEnabled} />
+                {/* PRD §6.6 在场成员列表 + 邀请链接 */}
+                <div className="mt-5 border-t border-white/5 pt-4">
+                  <PresenceList roomId={roomId} />
+                </div>
               </div>
             </div>
           )}
         </LiveKitRoom>
       ) : (
         <div className="absolute inset-0 z-10 flex items-center justify-center">
-          <p className="text-sm font-light text-cream-300">连接中…</p>
+          <p className="text-sm font-light text-cream-300">{tc('loading')}</p>
         </div>
       )}
 
@@ -254,19 +276,19 @@ export function RoomView({
         <div className="absolute inset-0 z-40 flex flex-col items-center justify-center gap-6 bg-ink-950/60 backdrop-blur-sm">
           <div className="text-center space-y-2">
             <h2 className="text-xl font-light tracking-wide text-cream-50">{roomName}</h2>
-            <p className="text-xs font-light text-cream-300">点击进入，记得打开麦克风</p>
+            <p className="text-xs font-light text-cream-300">{t('enterHint')}</p>
           </div>
           {recordingEnabled && (
             <div className="glass rounded-2xl px-4 py-2 text-center">
-              <p className="text-[11px] font-medium text-rose-light">🔴 本房正在录制</p>
-              <p className="text-[10px] font-light text-cream-300/60">进入即表示知悉</p>
+              <p className="text-[11px] font-medium text-rose-light">🔴 {t('recordingActive')}</p>
+              <p className="text-[10px] font-light text-cream-300/60">{t('recordingNotice')}</p>
             </div>
           )}
           <button
             onClick={() => setEntered(true)}
             className="btn-rose rounded-full px-8 py-3 text-sm font-medium tracking-wide text-white"
           >
-            进入房间
+            {t('enterRoom')}
           </button>
         </div>
       )}

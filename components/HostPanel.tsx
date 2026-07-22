@@ -10,10 +10,11 @@ interface Props {
   myRole: 'host' | 'cohost';
   hostId: string;
   cohostIds: string[];
+  recordingEnabled: boolean;
 }
 
-// PRD §6.2 房主/共主持：举手 + 在麦管理 + 踢/封/promote/demote/pin
-export function HostPanel({ roomId, myRole, hostId, cohostIds }: Props) {
+// PRD §6.2 房主/共主持：举手 + 在麦管理 + 踢/封/promote/demote/pin + 录制
+export function HostPanel({ roomId, myRole, hostId, cohostIds, recordingEnabled }: Props) {
   const participants = useParticipants();
   const raisedHands = useUI((s) => s.raisedHands);
   const removeRaisedHand = useUI((s) => s.removeRaisedHand);
@@ -21,6 +22,20 @@ export function HostPanel({ roomId, myRole, hostId, cohostIds }: Props) {
 
   // 我能做什么——host 可做全部；cohost 仅 grant/revoke/mute
   const canHostOnly = myRole === 'host';
+
+  // PRD §6.7 录制开关（host only）
+  async function toggleRecording() {
+    setBusy('toggle_recording');
+    try {
+      await fetch('/api/livekit/moderate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ roomId, action: 'toggle_recording' }),
+      });
+    } finally {
+      setBusy(null);
+    }
+  }
 
   // 在麦的发言者（非本地、canPublish）
   const speakers = participants.filter(
@@ -55,6 +70,28 @@ export function HostPanel({ roomId, myRole, hostId, cohostIds }: Props) {
 
   return (
     <div className="space-y-6">
+      {/* PRD §6.7 录制开关（host only）*/}
+      {canHostOnly && (
+        <section>
+          <button
+            onClick={toggleRecording}
+            disabled={busy === 'toggle_recording'}
+            className={
+              'w-full rounded-2xl px-4 py-2.5 text-[12px] font-medium transition-all disabled:opacity-40 ' +
+              (recordingEnabled
+                ? 'bg-rose/15 text-rose-light ring-1 ring-rose/20'
+                : 'border border-white/8 text-cream-200 hover:bg-white/5')
+            }
+          >
+            {recordingEnabled ? '🔴 停止录制' : '⏺ 开始录制'}
+          </button>
+          {recordingEnabled && (
+            <p className="mt-1.5 text-[10px] font-light text-rose/60">
+              全房正在录制，参与者已被告知
+            </p>
+          )}
+        </section>
+      )}
       {/* 举手申请 */}
       {raisedHands.length > 0 && (
         <section>

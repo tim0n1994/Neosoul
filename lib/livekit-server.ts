@@ -1,4 +1,4 @@
-import { AccessToken, RoomServiceClient } from 'livekit-server-sdk';
+import { AccessToken, RoomServiceClient, EgressClient, RoomCompositeEgressRequest } from 'livekit-server-sdk';
 
 const lkUrl = process.env.NEXT_PUBLIC_LIVEKIT_URL ?? '';
 // RoomServiceClient 需要 https host（PRD §5.2 踩坑预警）
@@ -9,6 +9,16 @@ export const roomService = new RoomServiceClient(
   process.env.LIVEKIT_API_KEY ?? '',
   process.env.LIVEKIT_API_SECRET ?? '',
 );
+
+// PRD §6.7 EgressClient——录制/回放。
+export const egressClient = new EgressClient(
+  httpUrl,
+  process.env.LIVEKIT_API_KEY ?? '',
+  process.env.LIVEKIT_API_SECRET ?? '',
+);
+
+// 便捷：构建 Room Composite Egress 请求（音频录制）
+export { RoomCompositeEgressRequest };
 
 export async function createToken(opts: {
   identity: string;

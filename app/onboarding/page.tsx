@@ -2,13 +2,16 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { createClient } from '@/lib/supabase/client';
 import { AvatarPicker } from '@/components/AvatarPicker';
-import { randomSeed } from '@/lib/avatar';
+import { InterestPicker } from '@/components/InterestPicker';
+import { randomSeed, type AvatarConfig } from '@/lib/avatar';
 
 export default function OnboardingPage() {
   const router = useRouter();
-  // 固定 supabase 实例，避免每次渲染新建导致 useEffect 无限重跑
+  const t = useTranslations('onboarding');
+  const tc = useTranslations('common');
   const [supabase] = useState(() => createClient());
 
   const [userId, setUserId] = useState<string | null>(null);
@@ -16,6 +19,8 @@ export default function OnboardingPage() {
   const [style, setStyle] = useState('thumbs');
   const [seed, setSeed] = useState('neo');
   const [avatarType, setAvatarType] = useState('dicebear');
+  const [avatarConfig, setAvatarConfig] = useState<AvatarConfig | null>(null);
+  const [interests, setInterests] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -32,7 +37,7 @@ export default function OnboardingPage() {
         setUserId(user.id);
         const { data: profile } = await supabase
           .from('profiles')
-          .select('display_name, avatar_style, avatar_seed, avatar_type')
+          .select('display_name, avatar_style, avatar_seed, avatar_type, avatar_config, interests')
           .eq('id', user.id)
           .maybeSingle();
         if (profile) {
@@ -40,6 +45,8 @@ export default function OnboardingPage() {
           setStyle(profile.avatar_style ?? 'thumbs');
           setSeed(profile.avatar_seed ?? randomSeed());
           setAvatarType(profile.avatar_type ?? 'dicebear');
+          setAvatarConfig(profile.avatar_config ?? null);
+          setInterests(profile.interests ?? []);
         }
       } catch {
         setError('加载失败，请刷新重试');
@@ -55,14 +62,21 @@ export default function OnboardingPage() {
     setSaving(true);
     const { error } = await supabase
       .from('profiles')
-      .update({ display_name: name, avatar_style: style, avatar_seed: seed, avatar_type: avatarType })
+      .update({
+        display_name: name,
+        avatar_style: style,
+        avatar_seed: seed,
+        avatar_type: avatarType,
+        avatar_config: avatarConfig,
+        interests,
+      })
       .eq('id', userId);
     setSaving(false);
     if (error) {
       setError(error.message);
       return;
     }
-    router.replace('/rooms');
+    router.replace('/discover');
   }
 
   return (
@@ -78,9 +92,9 @@ export default function OnboardingPage() {
         className="relative z-10 w-full max-w-[340px] animate-fade-in space-y-6"
       >
         <div className="text-center">
-          <h1 className="text-2xl font-light tracking-wide text-cream-50">完善你的形象</h1>
+          <h1 className="text-2xl font-light tracking-wide text-cream-50">{t('title')}</h1>
           <p className="mt-2 text-xs font-light tracking-wider text-cream-300">
-            选一个属于你的头像
+            {t('subtitle')}
           </p>
         </div>
 
@@ -90,16 +104,18 @@ export default function OnboardingPage() {
             seed={seed}
             avatarType={avatarType}
             userId={userId!}
+            avatarConfig={avatarConfig}
             onChange={(next) => {
               setStyle(next.style);
               setSeed(next.seed);
               setAvatarType(next.avatarType);
+              if (next.avatarConfig !== undefined) setAvatarConfig(next.avatarConfig);
             }}
           />
 
           <div className="mt-6">
             <label className="mb-1.5 block text-[11px] font-medium tracking-wider text-cream-300">
-              昵称
+              {t('nickname')}
             </label>
             <input
               value={displayName}
@@ -110,6 +126,11 @@ export default function OnboardingPage() {
             />
           </div>
 
+          {/* PRD §6.1 兴趣标签 */}
+          <div className="mt-5">
+            <InterestPicker selected={interests} onChange={setInterests} />
+          </div>
+
           {error && <p className="mt-4 text-xs text-rose/80">{error}</p>}
         </div>
 
@@ -118,7 +139,7 @@ export default function OnboardingPage() {
           disabled={saving}
           className="btn-rose w-full rounded-2xl py-3.5 text-sm font-medium tracking-wide text-white"
         >
-          {saving ? '保存中…' : '进入 Neosoul'}
+          {saving ? tc('loading') : t('enter')}
         </button>
       </form>
     </main>

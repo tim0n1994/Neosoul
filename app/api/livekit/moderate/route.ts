@@ -116,6 +116,55 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true });
   }
 
+  // ---- 录制开关（host only，不需要 targetIdentity）PRD §6.7 ----
+  if (action === 'toggle_recording') {
+    // 仅 host 可执行（canPerform 已校验）
+    const { data: roomFull } = await admin
+      .from('rooms')
+      .select('livekit_room, recording_enabled')
+      .eq('id', roomId)
+      .maybeSingle();
+    if (!roomFull) {
+      return NextResponse.json({ ok: false, error: 'room not found' }, { status: 404 });
+    }
+    const currentlyRecording = !!roomFull.recording_enabled;
+    try {
+      if (!currentlyRecording) {
+        // 开启录制——调 LiveKit Egress startRoomCompositeEgress（音频）
+        const { egressClient } = await import('@/lib/livekit-server');
+        const { EncodedFileOutput, EncodedFileType } = await import('livekit-server-sdk');
+        const fileOutput = new EncodedFileOutput({
+          fileType: EncodedFileType.MP4,
+          filepath: `recordings/${roomFull.livekit_room}/${Date.now()}.mp4`,
+        });
+        await egressClient.startRoomCompositeEgress(
+          roomFull.livekit_room,
+          { file: fileOutput },
+          { layout: 'speaker' },
+        );
+        await admin.from('rooms').update({ recording_enabled: true }).eq('id', roomId);
+        return NextResponse.json({ ok: true, recording: true });
+      } else {
+        // 停止录制——查活动 egress 并停止
+        const { egressClient } = await import('@/lib/livekit-server');
+        const activeEgress = await egressClient.listEgress({ roomName: roomFull.livekit_room });
+        for (const eg of activeEgress) {
+          const status = String(eg.status);
+          if (status.includes('STARTING') || status.includes('ACTIVE')) {
+            await egressClient.stopEgress(eg.egressId);
+          }
+        }
+        await admin.from('rooms').update({ recording_enabled: false }).eq('id', roomId);
+        return NextResponse.json({ ok: true, recording: false });
+      }
+    } catch (e) {
+      return NextResponse.json(
+        { ok: false, error: e instanceof Error ? e.message : 'recording toggle failed' },
+        { status: 500 },
+      );
+    }
+  }
+
   // ---- 以下操作都需要 targetIdentity ----
   if (!targetIdentity) {
     return NextResponse.json({ ok: false, error: 'targetIdentity required' }, { status: 400 });
