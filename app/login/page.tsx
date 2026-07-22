@@ -175,10 +175,28 @@ export default function LoginPage() {
         <div className="absolute bottom-0 right-0 h-[300px] w-[300px] rounded-full bg-gold/6 blur-[100px]" />
       </div>
 
-      <div className="relative z-10 w-full max-w-[340px] animate-fade-in space-y-8">
+      <div className="relative z-10 w-full max-w-[360px] animate-fade-in space-y-8">
+        {/* 标题区——高级感呈现 */}
         <div className="text-center">
-          <h1 className="text-4xl font-light tracking-[0.15em] text-cream-50">{tc('appName')}</h1>
-          <p className="mt-3 text-xs font-light tracking-wider text-cream-300">{tc('tagline')}</p>
+          <h1
+            className="text-5xl font-extralight tracking-[0.25em] text-transparent bg-clip-text"
+            style={{
+              backgroundImage: 'linear-gradient(135deg, #f5efe9 0%, #d9a29a 40%, #b89968 70%, #f5efe9 100%)',
+              textShadow: '0 0 60px rgba(196,123,120,0.3)',
+            }}
+          >
+            {tc('appName')}
+          </h1>
+          <div className="mx-auto mt-4 h-px w-16 bg-gradient-to-r from-transparent via-rose/40 to-transparent" />
+          <p className="mt-4 text-[13px] font-light tracking-[0.15em] leading-relaxed text-cream-200/80">
+            每一个声音，都在带我们回家。
+          </p>
+          <p className="mt-1 text-[12px] font-light tracking-[0.1em] leading-relaxed text-cream-300/50">
+            Every voice leads us home.
+          </p>
+          <p className="mt-3 text-[11px] font-medium tracking-[0.2em] text-rose-light/40">
+            Fxxk SOUL, Fxxk the noise, Fxxk the BAN.
+          </p>
         </div>
 
         <div className="glass rounded-3xl p-7">
