@@ -221,31 +221,29 @@ export function RoomView({
             onToggleChat={toggleChat}
           />
 
-          {/* 桌面端：右侧聊天（玻璃）*/}
-          <aside className="glass absolute right-0 top-0 z-20 hidden h-full w-[340px] flex-col border-l border-white/5 md:flex">
-            <ChatPanel roomId={roomId} myRole={role} myUserId={userId} />
-          </aside>
-
-          {/* 移动端聊天抽屉 */}
+          {/* 聊天面板——单实例，桌面固定 + 移动端抽屉（CSS 控制，不重复渲染）*/}
+          {/* 移动端：chatOpen 时显示遮罩 */}
           {chatOpen && (
             <div
-              className="fixed inset-0 z-[60] flex flex-col justify-end bg-black/60 backdrop-blur-sm md:hidden"
+              className="fixed inset-0 z-[55] bg-black/60 backdrop-blur-sm md:hidden"
               onClick={toggleChat}
-            >
-              <div
-                className="glass-strong flex h-[75dvh] w-full flex-col rounded-t-3xl"
-                onClick={(e) => e.stopPropagation()}
-              >
-                {/* 拖拽指示器 */}
-                <div className="flex justify-center pt-2 pb-1">
-                  <div className="h-1 w-10 rounded-full bg-white/15" />
-                </div>
-                <div className="min-h-0 flex-1 overflow-hidden">
-                  <ChatPanel roomId={roomId} myRole={role} myUserId={userId} />
-                </div>
-              </div>
-            </div>
+            />
           )}
+          <aside
+            className={
+              'glass-strong absolute right-0 top-0 z-[56] flex h-full w-full flex-col border-l border-white/5 ' +
+              'transition-transform duration-300 md:z-20 md:w-[340px] md:translate-x-0 ' +
+              (chatOpen ? 'translate-x-0' : 'translate-x-full md:translate-x-0')
+            }
+          >
+            {/* 拖拽指示器（仅移动端）*/}
+            <div className="flex justify-center pt-2 pb-1 md:hidden">
+              <div className="h-1 w-10 rounded-full bg-white/15" />
+            </div>
+            <div className="min-h-0 flex-1 overflow-hidden md:flex md:flex-col">
+              <ChatPanel roomId={roomId} myRole={role} myUserId={userId} />
+            </div>
+          </aside>
 
           {/* 房主/共主持管麦抽屉 */}
           {hostPanelOpen && (
