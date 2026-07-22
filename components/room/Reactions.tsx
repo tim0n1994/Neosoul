@@ -128,9 +128,9 @@ export function Reactions() {
         ))}
       </div>
 
-      {/* 表情按钮条——长按连续发送 + 触觉反馈 */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-30 flex justify-center p-4">
-        <div className="glass pointer-events-auto mb-16 flex items-center gap-0.5 rounded-full px-1.5 py-1.5">
+      {/* 表情按钮条——最底部 */}
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-30 flex justify-center p-3">
+        <div className="glass pointer-events-auto flex items-center gap-0.5 rounded-full px-1.5 py-1.5">
           {REACTIONS.map((emoji) => (
             <button
               key={emoji}
