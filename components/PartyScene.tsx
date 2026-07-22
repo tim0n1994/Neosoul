@@ -1,7 +1,6 @@
 'use client';
 
 import { Canvas } from '@react-three/fiber';
-import { Environment } from '@react-three/drei';
 import { useParticipants } from '@livekit/components-react';
 import { AvatarOrb } from '@/components/AvatarOrb';
 import { Suspense, useMemo } from 'react';
@@ -46,13 +45,12 @@ function SceneContent() {
 
   return (
     <>
-      {/* 三点光照——让虹彩和 clearcoat 有反射 */}
-      <ambientLight intensity={0.3} />
-      <directionalLight position={[3, 5, 2]} intensity={0.6} color="#f5efe9" />
-      <pointLight position={[-3, 2, -2]} intensity={0.4} color="#c47b78" />
-      <pointLight position={[0, -2, 3]} intensity={0.2} color="#b89968" />
-      {/* 环境贴图——让 MeshPhysicalMaterial 的 iridescence/clearcoat 有反射环境 */}
-      <Environment preset="night" />
+      {/* 多点光照——暖色系，模拟环境反射 */}
+      <ambientLight intensity={0.4} />
+      <directionalLight position={[3, 5, 2]} intensity={0.7} color="#f5efe9" />
+      <pointLight position={[-3, 2, -2]} intensity={0.5} color="#c47b78" />
+      <pointLight position={[0, -2, 3]} intensity={0.3} color="#b89968" />
+      <spotLight position={[0, 4, 0]} angle={0.5} penumbra={1} intensity={0.3} color="#d9a29a" />
 
       {speakers.map((p, i) => {
         const meta = parseMeta(p.metadata);

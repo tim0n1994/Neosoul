@@ -46,22 +46,16 @@ export function AvatarOrb({
   const emissive = useMemo(() => new THREE.Color(themeColor), [themeColor]);
   const ringColor = useMemo(() => new THREE.Color(themeColor), [themeColor]);
 
-  // 玻璃外壳材质——虹彩 + 透射 + clearcoat
+  // 玻璃外壳材质——透明 + clearcoat，无 transmission 避免性能问题
   const shellMaterial = useMemo(() => {
     return new THREE.MeshPhysicalMaterial({
       transparent: true,
-      opacity: 0.15,
-      roughness: 0.0,
-      metalness: 0.0,
-      transmission: 0.9,
-      thickness: 0.5,
+      opacity: 0.12,
+      roughness: 0.05,
+      metalness: 0.3,
       clearcoat: 1.0,
       clearcoatRoughness: 0.0,
-      ior: 1.3,
-      iridescence: 1.0,
-      iridescenceIOR: 1.5,
-      iridescenceThicknessRange: [100, 400],
-      envMapIntensity: 1.0,
+      envMapIntensity: 0.8,
     });
   }, []);
 
