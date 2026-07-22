@@ -20,34 +20,46 @@ export function RoomEventHandlers({ isHost }: Props) {
   const setMicEnabled = useUI((s) => s.setMicEnabled);
   const { localParticipant } = useLocalParticipant();
   const permissions = useLocalParticipantPermissions();
-  const decoder = new TextDecoder();
 
   // 房主端：收举手 data → 入列（去重由 store 负责）
   useDataChannel('raise_hand', (msg) => {
-    if (!isHost) return;
     const from = msg.from;
     if (!from) return;
     let name = from.name ?? 'Guest';
+    let identity = from.identity;
     try {
-      const parsed = JSON.parse(decoder.decode(msg.payload));
+      const parsed = JSON.parse(new TextDecoder().decode(msg.payload));
       if (typeof parsed?.name === 'string') name = parsed.name;
+      if (typeof parsed?.identity === 'string') identity = parsed.identity;
     } catch {
       // 非 JSON payload，用 participant.name 兜底
     }
-    addRaisedHand({ identity: from.identity, name });
+    addRaisedHand({ identity, name });
   });
 
   // 本机权限变更（grant/remove 触发）→ 自动开/关麦
+  // 关键：当房主批准上麦后，LiveKit 推送 canPublish=true，
+  // 被批准者自动开麦，这样房主就能听到新发言者的声音
   const prevCanPublish = useRef<boolean | undefined>(undefined);
   useEffect(() => {
     const canPublish = permissions?.canPublish;
     if (canPublish === undefined || canPublish === prevCanPublish.current) return;
     prevCanPublish.current = canPublish;
-    localParticipant
-      .setMicrophoneEnabled(canPublish)
-      .then(() => setMicEnabled(canPublish))
-      .catch(() => setMicEnabled(false));
-  }, [permissions?.canPublish, localParticipant, setMicEnabled]);
+
+    if (canPublish && !isHost) {
+      // 被 grant 上麦 → 自动开麦
+      localParticipant
+        .setMicrophoneEnabled(true)
+        .then(() => setMicEnabled(true))
+        .catch(() => setMicEnabled(false));
+    } else if (!canPublish) {
+      // 被 revoke 下麦 → 关麦
+      localParticipant
+        .setMicrophoneEnabled(false)
+        .then(() => setMicEnabled(false))
+        .catch(() => {});
+    }
+  }, [permissions?.canPublish, isHost, localParticipant, setMicEnabled]);
 
   return null;
 }
