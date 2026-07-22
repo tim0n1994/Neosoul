@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import {
   useDataChannel,
   useLocalParticipant,
+  useLocalParticipantPermissions,
 } from '@livekit/components-react';
 import { useUI } from '@/lib/store';
 
@@ -19,13 +20,16 @@ interface Props {
 export function MicControls({ isHost, role, onOpenHostPanel, onToggleChat }: Props) {
   const t = useTranslations('room');
   const { localParticipant } = useLocalParticipant();
+  const permissions = useLocalParticipantPermissions();
   const micEnabled = useUI((s) => s.micEnabled);
   const setMicEnabled = useUI((s) => s.setMicEnabled);
   const { send } = useDataChannel('raise_hand');
   const [raised, setRaised] = useState(false);
 
-  // host/cohost 可直接开麦；speaker 在被 grant 后也可开麦（micEnabled 由权限变更 hook 设置）
-  const canSpeak = isHost || role === 'cohost' || micEnabled;
+  // 关键：用 LiveKit 的 permissions.canPublish 判断是否能开麦
+  // host/cohost 的 token 直接带 canPublish=true
+  // audience 被 grant 后 LiveKit 推送权限更新 → permissions.canPublish 变 true
+  const canPublish = permissions?.canPublish ?? (isHost || role === 'cohost');
 
   async function toggle() {
     const next = !micEnabled;
@@ -42,20 +46,24 @@ export function MicControls({ isHost, role, onOpenHostPanel, onToggleChat }: Pro
     try {
       await send(
         encoder.encode(
-          JSON.stringify({ type: 'raise_hand', name: localParticipant.name }),
+          JSON.stringify({
+            type: 'raise_hand',
+            name: localParticipant.name ?? 'Guest',
+            identity: localParticipant.identity,
+          }),
         ),
         { reliable: true },
       );
       setRaised(true);
     } catch {
-      // 连接断开或无 canPublishData，静默失败
+      // 连接断开，静默失败
     }
   }
 
   return (
     <div className="pointer-events-none absolute inset-x-0 bottom-0 z-30 flex justify-center p-4">
-      <div className="glass pointer-events-auto mb-12 flex items-center gap-1.5 rounded-full px-2 py-2">
-        {canSpeak ? (
+      <div className="glass pointer-events-auto mb-16 flex items-center gap-1.5 rounded-full px-2 py-2">
+        {canPublish ? (
           <button
             onClick={toggle}
             className={

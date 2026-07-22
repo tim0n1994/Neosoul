@@ -225,14 +225,20 @@ export function RoomView({
           {/* 移动端聊天抽屉 */}
           {chatOpen && (
             <div
-              className="fixed inset-0 z-50 flex flex-col justify-end bg-black/50 backdrop-blur-sm md:hidden"
+              className="fixed inset-0 z-[60] flex flex-col justify-end bg-black/60 backdrop-blur-sm md:hidden"
               onClick={toggleChat}
             >
               <div
-                className="glass-strong h-[72vh] w-full rounded-t-3xl"
+                className="glass-strong flex h-[75dvh] w-full flex-col rounded-t-3xl"
                 onClick={(e) => e.stopPropagation()}
               >
-                <ChatPanel roomId={roomId} myRole={role} myUserId={userId} />
+                {/* 拖拽指示器 */}
+                <div className="flex justify-center pt-2 pb-1">
+                  <div className="h-1 w-10 rounded-full bg-white/15" />
+                </div>
+                <div className="min-h-0 flex-1 overflow-hidden">
+                  <ChatPanel roomId={roomId} myRole={role} myUserId={userId} />
+                </div>
               </div>
             </div>
           )}
