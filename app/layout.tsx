@@ -11,8 +11,18 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: 'Neosoul',
-  description: '一场漂浮在暧昧深空里的语音派对',
+  title: 'NEOSOUL',
+  description: '轻量、开放、健康的兴趣语音社交平台',
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'NEOSOUL',
+  },
+  icons: {
+    icon: '/icons/icon-192.png',
+    apple: '/icons/icon-192.png',
+  },
 };
 
 export const viewport: Viewport = {
@@ -33,6 +43,12 @@ export default function RootLayout({
       <body className="font-sans antialiased">
         {children}
         <div className="grain" />
+        {/* PWA Service Worker 注册 (PRD §6.12) */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('/sw.js').catch(()=>{})})}`,
+          }}
+        />
       </body>
     </html>
   );
