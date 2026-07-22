@@ -12,26 +12,11 @@ export default function LoginPage() {
   const [supabase] = useState(() => createClient());
 
   const [email, setEmail] = useState('');
-  const [token, setToken] = useState('');
-  const [step, setStep] = useState<'email' | 'otp'>('email');
-  const [cooldown, setCooldown] = useState(0);
+  const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  function startCooldown() {
-    setCooldown(60);
-    const timer = setInterval(() => {
-      setCooldown((c) => {
-        if (c <= 1) {
-          clearInterval(timer);
-          return 0;
-        }
-        return c - 1;
-      });
-    }, 1000);
-  }
-
-  async function sendOtp(e: React.FormEvent) {
+  async function sendMagicLink(e: React.FormEvent) {
     e.preventDefault();
     if (!email.trim()) return;
     setError(null);
@@ -48,30 +33,10 @@ export default function LoginPage() {
       setError(error.message);
       return;
     }
-    setStep('otp');
-    startCooldown();
-  }
-
-  async function verifyOtpCode(e: React.FormEvent) {
-    e.preventDefault();
-    if (token.trim().length !== 6) return;
-    setError(null);
-    setLoading(true);
-    const { error } = await supabase.auth.verifyOtp({
-      email: email.trim(),
-      token: token.trim(),
-      type: 'email',
-    });
-    setLoading(false);
-    if (error) {
-      setError(error.message);
-      return;
-    }
-    router.replace('/');
+    setSent(true);
   }
 
   async function resend() {
-    if (cooldown > 0) return;
     setError(null);
     setLoading(true);
     const { error } = await supabase.auth.signInWithOtp({
@@ -86,7 +51,6 @@ export default function LoginPage() {
       setError(error.message);
       return;
     }
-    startCooldown();
   }
 
   // PRD §6.1 OAuth 登录（Google / Apple / Discord）
@@ -119,36 +83,34 @@ export default function LoginPage() {
         </div>
 
         <div className="glass rounded-3xl p-7">
-          {step === 'email' ? (
-            <form onSubmit={sendOtp} className="space-y-4">
-              <div>
-                <label className="mb-1.5 block text-[11px] font-medium tracking-wider text-cream-300">
-                  {t('email')}
-                </label>
-                <input
-                  type="email"
-                  required
-                  autoFocus
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="input-warm w-full rounded-2xl px-4 py-3 text-sm text-cream-50 outline-none placeholder:text-cream-300/40"
-                  placeholder="you@example.com"
-                />
-              </div>
-              {error && <p className="text-xs leading-relaxed text-rose/80">{error}</p>}
-              <button
-                type="submit"
-                disabled={loading}
-                className="btn-rose w-full rounded-2xl py-3 text-sm font-medium tracking-wide text-white"
-              >
-                {loading ? tc('loading') : t('sendCode')}
-              </button>
-            </form>
-          ) : null}
-
-          {/* OAuth 分隔线 + 按钮（仅 email 步骤显示）PRD §6.1 */}
-          {step === 'email' && (
+          {!sent ? (
             <>
+              <form onSubmit={sendMagicLink} className="space-y-4">
+                <div>
+                  <label className="mb-1.5 block text-[11px] font-medium tracking-wider text-cream-300">
+                    {t('email')}
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    autoFocus
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="input-warm w-full rounded-2xl px-4 py-3 text-sm text-cream-50 outline-none placeholder:text-cream-300/40"
+                    placeholder="you@example.com"
+                  />
+                </div>
+                {error && <p className="text-xs leading-relaxed text-rose/80">{error}</p>}
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="btn-rose w-full rounded-2xl py-3 text-sm font-medium tracking-wide text-white"
+                >
+                  {loading ? tc('loading') : t('sendCode')}
+                </button>
+              </form>
+
+              {/* OAuth 分隔线 + 按钮 PRD §6.1 */}
               <div className="my-5 flex items-center gap-3">
                 <div className="h-px flex-1 bg-white/5" />
                 <span className="text-[10px] font-light tracking-wider text-cream-300/40">或</span>
@@ -184,56 +146,36 @@ export default function LoginPage() {
                 </button>
               </div>
             </>
-          )}
-
-          {step !== 'email' && (
-            <form onSubmit={verifyOtpCode} className="space-y-4">
-              <div className="text-center">
-                <p className="text-xs text-cream-300">验证码已发送至</p>
-                <p className="text-sm font-medium text-cream-50">{email}</p>
+          ) : (
+            <div className="space-y-5 text-center">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-rose/10">
+                <span className="text-2xl">📧</span>
               </div>
               <div>
-                <label className="mb-1.5 block text-[11px] font-medium tracking-wider text-cream-300">
-                  {t('enterCode')}
-                </label>
-                <input
-                  type="text"
-                  required
-                  autoFocus
-                  maxLength={6}
-                  inputMode="numeric"
-                  value={token}
-                  onChange={(e) => setToken(e.target.value.replace(/\D/g, ''))}
-                  className="input-warm w-full rounded-2xl px-4 py-3 text-center text-lg tracking-[0.5em] text-cream-50 outline-none placeholder:text-cream-300/40"
-                  placeholder="000000"
-                />
+                <p className="text-sm font-light text-cream-100">验证邮件已发送至</p>
+                <p className="mt-1 text-base font-medium text-cream-50">{email}</p>
               </div>
-              {error && <p className="text-xs leading-relaxed text-rose/80">{error}</p>}
+              <p className="text-xs leading-relaxed text-cream-300/60">
+                点击邮件中的「确认注册」按钮即可登录。<br />
+                链接将跳转回 NEOSOUL 完成验证。
+              </p>
+              {error && <p className="text-xs text-rose/80">{error}</p>}
               <button
-                type="submit"
-                disabled={loading || token.length !== 6}
-                className="btn-rose w-full rounded-2xl py-3 text-sm font-medium tracking-wide text-white"
+                type="button"
+                onClick={resend}
+                disabled={loading}
+                className="text-[11px] font-light text-cream-300 transition-colors hover:text-cream-100 disabled:opacity-40"
               >
-                {loading ? tc('loading') : t('verify')}
+                {loading ? '重新发送中…' : '重新发送'}
               </button>
-              <div className="flex justify-between pt-1">
-                <button
-                  type="button"
-                  onClick={resend}
-                  disabled={cooldown > 0}
-                  className="text-[11px] font-light text-cream-300 transition-colors hover:text-cream-100 disabled:opacity-40"
-                >
-                  {cooldown > 0 ? `${cooldown}s 后可重发` : '重新发送'}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => { setStep('email'); setToken(''); setError(null); }}
-                  className="text-[11px] font-light text-cream-300 transition-colors hover:text-cream-100"
-                >
-                  换一个邮箱
-                </button>
-              </div>
-            </form>
+              <button
+                type="button"
+                onClick={() => { setSent(false); setError(null); }}
+                className="block w-full text-[11px] font-light text-cream-300/50 transition-colors hover:text-cream-100"
+              >
+                换一个邮箱
+              </button>
+            </div>
           )}
         </div>
       </div>
