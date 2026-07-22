@@ -16,6 +16,7 @@ import { PartyScene } from '@/components/PartyScene';
 import { RoomEventHandlers } from '@/components/RoomEventHandlers';
 import { Reactions } from '@/components/room/Reactions';
 import { PinnedBar } from '@/components/room/PinnedBar';
+import { ActivityHost } from '@/components/room/ActivityHost';
 import { useUI } from '@/lib/store';
 
 interface Props {
@@ -186,6 +187,9 @@ export function RoomView({
 
           {/* PRD §6.3 Reactions 飘屏 */}
           <Reactions />
+
+          {/* PRD §6.4 ActivityHost——可插拔房间活动 */}
+          <ActivityHost roomId={roomId} selfId={userId} role={role} />
 
           {/* 底部麦控（玻璃浮岛）*/}
           <MicControls
