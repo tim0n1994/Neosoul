@@ -62,8 +62,8 @@ export function MicControls({ isHost, role, onOpenHostPanel, onToggleChat }: Pro
   }
 
   return (
-    <div className="pointer-events-none absolute inset-x-0 bottom-0 z-30 flex justify-center p-4">
-      <div className="glass pointer-events-auto mb-16 flex items-center gap-1.5 rounded-full px-2 py-2">
+    <div className="pointer-events-none absolute inset-x-0 bottom-0 z-40 flex justify-center p-4">
+      <div className="glass pointer-events-auto mb-14 flex items-center gap-1.5 rounded-full px-2 py-2">
         {canPublish ? (
           <button
             onClick={toggle}
