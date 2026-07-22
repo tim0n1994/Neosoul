@@ -4,6 +4,7 @@ create table if not exists public.profiles (
   display_name  text not null default 'Guest',
   avatar_style  text not null default 'thumbs',   -- DiceBear 风格名
   avatar_seed   text not null default 'neo',       -- DiceBear 种子
+  avatar_type   text not null default 'dicebear' check (avatar_type in ('dicebear','custom')),
   created_at    timestamptz not null default now()
 );
 
