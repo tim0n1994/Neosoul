@@ -3,7 +3,7 @@ import { createServerClient, type CookieOptions } from '@supabase/ssr';
 
 // 1. 刷新 Supabase session（写回 cookie）。
 // 2. 路由保护：未登录访问受保护页 → /login；已登录访问 /login → /rooms。
-const PROTECTED = ['/rooms', '/onboarding'];
+const PROTECTED = ['/rooms', '/onboarding', '/discover'];
 const AUTH_ROUTES = ['/login'];
 
 export async function middleware(request: NextRequest) {
