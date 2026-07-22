@@ -73,7 +73,7 @@ export default function LoginPage() {
     const { error } = await supabase.auth.signInWithOtp({
       email: mail,
       options: {
-        shouldCreateUser: false, // 不自动建用户，只发验证码
+        shouldCreateUser: true, // 允许新邮箱通过 OTP 创建用户
         emailRedirectTo: window.location.origin + '/',
       },
     });
@@ -94,7 +94,7 @@ export default function LoginPage() {
     const { error } = await supabase.auth.signInWithOtp({
       email: email.trim(),
       options: {
-        shouldCreateUser: false,
+        shouldCreateUser: true,
         emailRedirectTo: window.location.origin + '/',
       },
     });
