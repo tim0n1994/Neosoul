@@ -68,19 +68,18 @@ export function CreateRoomButton() {
     }
     setBusy(true);
     setError(null);
-    const { data, error } = await supabase
-      .from('rooms')
-      .insert({
-        name: roomName,
-        host_id: userId,
-        livekit_room: 'room_' + crypto.randomUUID(),
-        background_url: bgPath,
-      })
-      .select('id')
-      .single();
+    // PRD §6.10 [红线]：通过 API 路由建房（限流）
+    const res = await fetch('/api/rooms', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: roomName, backgroundUrl: bgPath }),
+    });
+    const data = res.ok ? await res.json() : null;
     setBusy(false);
-    if (error || !data) {
-      setError(error?.message ?? '创建失败');
+    if (!res.ok || !data?.id) {
+      const e = data ?? (await res.json().catch(() => ({})));
+      if (e.error === 'rate_limited') setError('创建太快了，请稍后再试');
+      else setError(e.error ?? '创建失败');
       return;
     }
     setOpen(false);

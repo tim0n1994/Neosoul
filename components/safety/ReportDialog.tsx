@@ -33,16 +33,16 @@ export function ReportDialog({ targetType, targetId, open, onClose }: Props) {
   async function submit() {
     if (!reason) return;
     setSubmitting(true);
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    await supabase.from('reports').insert({
-      reporter_id: user?.id ?? null,
-      target_type: targetType,
-      target_id: String(targetId),
-      reason,
-      note: note.trim() || null,
-      status: 'open',
+    // PRD §6.10 [红线]：通过 API 路由举报（限流 + 服务端设置 reporter_id 防伪造）
+    await fetch('/api/reports', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        targetType,
+        targetId: String(targetId),
+        reason,
+        note: note.trim(),
+      }),
     });
     setSubmitting(false);
     setDone(true);
