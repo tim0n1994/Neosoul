@@ -6,6 +6,9 @@ import { AvatarImage } from '@/components/AvatarImage';
 
 interface Props {
   roomId: string;
+  /** 当前用户在房内的角色——决定能否删除他人消息 */
+  myRole?: 'host' | 'cohost' | 'speaker' | 'audience';
+  myUserId?: string;
 }
 
 type Sender = {
@@ -20,12 +23,13 @@ type Message = {
   kind: 'text' | 'image';
   body: string;
   created_at: string;
+  deleted_at: string | null;
 };
 
 const MAX_TEXT = 500;
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 
-export function ChatPanel({ roomId }: Props) {
+export function ChatPanel({ roomId, myRole, myUserId }: Props) {
   const [supabase] = useState(() => createClient());
   const [messages, setMessages] = useState<Message[]>([]);
   const [senders, setSenders] = useState<Record<string, Sender>>({});
@@ -38,7 +42,7 @@ export function ChatPanel({ roomId }: Props) {
     (async () => {
       const { data } = await supabase
         .from('messages')
-        .select('id, sender_id, kind, body, created_at')
+        .select('id, sender_id, kind, body, created_at, deleted_at')
         .eq('room_id', roomId)
         .order('created_at', { ascending: false })
         .limit(50);
@@ -99,6 +103,17 @@ export function ChatPanel({ roomId }: Props) {
               }));
             }
           }
+        },
+      )
+      // PRD §6.3：监听消息软删（UPDATE deleted_at）→ 实时隐藏
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'messages', filter: `room_id=eq.${roomId}` },
+        (payload) => {
+          const updated = payload.new as Message;
+          setMessages((prev) =>
+            prev.map((m) => (m.id === updated.id ? { ...m, deleted_at: updated.deleted_at } : m)),
+          );
         },
       )
       .subscribe();
@@ -170,6 +185,21 @@ export function ChatPanel({ roomId }: Props) {
     setBusy(false);
   }
 
+  // PRD §6.3：消息软删——host/cohost 可删任意，普通用户删自己的
+  async function deleteMessage(id: number) {
+    const res = await fetch('/api/livekit/moderate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ roomId, action: 'delete_message', messageId: id }),
+    });
+    if (!res.ok) {
+      const e = await res.json().catch(() => ({}));
+      alert('删除失败：' + (e.error ?? ''));
+    }
+  }
+
+  const canModerate = myRole === 'host' || myRole === 'cohost';
+
   return (
     <div className="flex h-full flex-col">
       {/* 标题 */}
@@ -186,14 +216,30 @@ export function ChatPanel({ roomId }: Props) {
         )}
         {messages.map((m) => {
           const s = senders[m.sender_id];
+          const isDeleted = !!m.deleted_at;
+          const canDelete = canModerate || m.sender_id === myUserId;
           return (
-            <div key={m.id} className="flex items-start gap-2.5 animate-fade-in">
+            <div key={m.id} className="group flex items-start gap-2.5 animate-fade-in">
               {s && <AvatarImage style={s.avatar_style} seed={s.avatar_seed} size={28} />}
               <div className="min-w-0 flex-1">
-                <div className="text-[10px] font-light tracking-wide text-cream-300/70">
-                  {s?.display_name ?? 'Guest'}
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-light tracking-wide text-cream-300/70">
+                    {s?.display_name ?? 'Guest'}
+                  </span>
+                  {!isDeleted && canDelete && (
+                    <button
+                      onClick={() => deleteMessage(m.id)}
+                      className="opacity-0 transition-opacity group-hover:opacity-100 text-[9px] text-rose/60 hover:text-rose"
+                    >
+                      删除
+                    </button>
+                  )}
                 </div>
-                {m.kind === 'text' ? (
+                {isDeleted ? (
+                  <div className="mt-0.5 text-[12px] font-light italic text-cream-300/30">
+                    [消息已删除]
+                  </div>
+                ) : m.kind === 'text' ? (
                   <div className="mt-0.5 break-words text-[13px] font-light leading-relaxed text-cream-100">
                     {m.body}
                   </div>

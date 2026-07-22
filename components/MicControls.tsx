@@ -9,19 +9,21 @@ import { useUI } from '@/lib/store';
 
 interface Props {
   isHost: boolean;
+  role: 'host' | 'cohost' | 'speaker' | 'audience';
   onOpenHostPanel?: () => void;
   onToggleChat?: () => void;
 }
 
 // 底部麦控（玻璃浮岛）。
-export function MicControls({ isHost, onOpenHostPanel, onToggleChat }: Props) {
+export function MicControls({ isHost, role, onOpenHostPanel, onToggleChat }: Props) {
   const { localParticipant } = useLocalParticipant();
   const micEnabled = useUI((s) => s.micEnabled);
   const setMicEnabled = useUI((s) => s.setMicEnabled);
   const { send } = useDataChannel('raise_hand');
   const [raised, setRaised] = useState(false);
 
-  const canSpeak = isHost || micEnabled;
+  // host/cohost 可直接开麦；speaker 在被 grant 后也可开麦（micEnabled 由权限变更 hook 设置）
+  const canSpeak = isHost || role === 'cohost' || micEnabled;
 
   async function toggle() {
     const next = !micEnabled;
@@ -50,7 +52,7 @@ export function MicControls({ isHost, onOpenHostPanel, onToggleChat }: Props) {
 
   return (
     <div className="pointer-events-none absolute inset-x-0 bottom-0 z-30 flex justify-center p-4">
-      <div className="glass pointer-events-auto flex items-center gap-1.5 rounded-full px-2 py-2">
+      <div className="glass pointer-events-auto mb-12 flex items-center gap-1.5 rounded-full px-2 py-2">
         {canSpeak ? (
           <button
             onClick={toggle}
@@ -78,7 +80,7 @@ export function MicControls({ isHost, onOpenHostPanel, onToggleChat }: Props) {
           </button>
         )}
 
-        {isHost && onOpenHostPanel && (
+        {(role === 'host' || role === 'cohost') && onOpenHostPanel && (
           <button
             onClick={onOpenHostPanel}
             className="flex h-11 w-11 items-center justify-center rounded-full bg-white/5 text-base text-cream-200 transition-colors hover:bg-white/8"

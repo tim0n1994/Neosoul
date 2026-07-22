@@ -1,7 +1,9 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
+import { createAdmin } from '@/lib/supabase/admin';
 import { RoomView } from '@/components/RoomView';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { resolveRole } from '@/lib/room-roles';
 import Link from 'next/link';
 
 export default async function RoomPage({
@@ -16,9 +18,10 @@ export default async function RoomPage({
   } = await supabase.auth.getUser();
   if (!user) redirect('/login');
 
-  const { data: room } = await supabase
+  const admin = createAdmin();
+  const { data: room } = await admin
     .from('rooms')
-    .select('id, name, livekit_room, host_id, is_live, background_url')
+    .select('id, name, livekit_room, host_id, is_live, background_url, recording_enabled')
     .eq('id', id)
     .maybeSingle();
 
@@ -41,7 +44,16 @@ export default async function RoomPage({
     );
   }
 
-  const isHost = room.host_id === user.id;
+  // 查 cohost 列表
+  const { data: cohostRows } = await admin
+    .from('room_roles')
+    .select('user_id')
+    .eq('room_id', id)
+    .eq('role', 'cohost');
+  const cohostIds = (cohostRows ?? []).map((r) => r.user_id as string);
+
+  const role = resolveRole(user.id, room.host_id, cohostIds, false);
+  const isHost = role === 'host';
 
   return (
     <ErrorBoundary>
@@ -50,6 +62,11 @@ export default async function RoomPage({
         isHost={isHost}
         roomName={room.name}
         backgroundUrl={room.background_url}
+        userId={user.id}
+        role={role}
+        hostId={room.host_id}
+        cohostIds={cohostIds}
+        recordingEnabled={room.recording_enabled ?? false}
       />
     </ErrorBoundary>
   );

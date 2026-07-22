@@ -14,6 +14,8 @@ import { HostPanel } from '@/components/HostPanel';
 import { ChatPanel } from '@/components/ChatPanel';
 import { PartyScene } from '@/components/PartyScene';
 import { RoomEventHandlers } from '@/components/RoomEventHandlers';
+import { Reactions } from '@/components/room/Reactions';
+import { PinnedBar } from '@/components/room/PinnedBar';
 import { useUI } from '@/lib/store';
 
 interface Props {
@@ -21,6 +23,11 @@ interface Props {
   isHost: boolean;
   roomName: string;
   backgroundUrl: string | null;
+  userId: string;
+  role: 'host' | 'cohost' | 'speaker' | 'audience';
+  hostId: string;
+  cohostIds: string[];
+  recordingEnabled: boolean;
 }
 
 function HostMicSetup({ isHost }: { isHost: boolean }) {
@@ -48,7 +55,17 @@ function HostMicSetup({ isHost }: { isHost: boolean }) {
   return null;
 }
 
-export function RoomView({ roomId, isHost, roomName, backgroundUrl }: Props) {
+export function RoomView({
+  roomId,
+  isHost,
+  roomName,
+  backgroundUrl,
+  userId,
+  role,
+  hostId,
+  cohostIds,
+  recordingEnabled,
+}: Props) {
   const [token, setToken] = useState<string | null>(null);
   const [url, setUrl] = useState('');
   const [entered, setEntered] = useState(false);
@@ -56,6 +73,9 @@ export function RoomView({ roomId, isHost, roomName, backgroundUrl }: Props) {
   const [hostPanelOpen, setHostPanelOpen] = useState(false);
   const chatOpen = useUI((s) => s.chatOpen);
   const toggleChat = useUI((s) => s.toggleChat);
+
+  // host/cohost 可开管麦面板
+  const canModerate = role === 'host' || role === 'cohost';
 
   useEffect(() => {
     let cancelled = false;
@@ -124,9 +144,16 @@ export function RoomView({ roomId, isHost, roomName, backgroundUrl }: Props) {
 
       {/* 顶部信息栏（玻璃）*/}
       <div className="absolute left-0 right-0 top-0 z-30 flex items-center justify-between p-4">
-        <div className="glass rounded-full px-4 py-1.5">
+        <div className="glass flex items-center gap-2 rounded-full px-4 py-1.5">
           <span className="text-sm font-light text-cream-50">{roomName}</span>
-          {isHost && <span className="ml-2 text-[10px] font-medium tracking-wider text-rose-light">房主</span>}
+          {role === 'host' && <span className="text-[10px] font-medium tracking-wider text-rose-light">房主</span>}
+          {role === 'cohost' && <span className="text-[10px] font-medium tracking-wider text-gold/80">共主持</span>}
+          {recordingEnabled && (
+            <span className="flex items-center gap-1 rounded-full bg-rose/15 px-2 py-0.5 text-[9px] font-medium text-rose-light">
+              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-rose" />
+              录制中
+            </span>
+          )}
         </div>
         <Link
           href="/rooms"
@@ -154,16 +181,23 @@ export function RoomView({ roomId, isHost, roomName, backgroundUrl }: Props) {
           <RoomEventHandlers isHost={isHost} />
           <HostMicSetup isHost={isHost} />
 
+          {/* PRD §6.3 置顶栏 */}
+          <PinnedBar roomId={roomId} />
+
+          {/* PRD §6.3 Reactions 飘屏 */}
+          <Reactions />
+
           {/* 底部麦控（玻璃浮岛）*/}
           <MicControls
             isHost={isHost}
-            onOpenHostPanel={isHost ? () => setHostPanelOpen(true) : undefined}
+            role={role}
+            onOpenHostPanel={canModerate ? () => setHostPanelOpen(true) : undefined}
             onToggleChat={toggleChat}
           />
 
           {/* 桌面端：右侧聊天（玻璃）*/}
           <aside className="glass absolute right-0 top-0 z-20 hidden h-full w-[340px] flex-col border-l border-white/5 md:flex">
-            <ChatPanel roomId={roomId} />
+            <ChatPanel roomId={roomId} myRole={role} myUserId={userId} />
           </aside>
 
           {/* 移动端聊天抽屉 */}
@@ -176,12 +210,12 @@ export function RoomView({ roomId, isHost, roomName, backgroundUrl }: Props) {
                 className="glass-strong h-[72vh] w-full rounded-t-3xl"
                 onClick={(e) => e.stopPropagation()}
               >
-                <ChatPanel roomId={roomId} />
+                <ChatPanel roomId={roomId} myRole={role} myUserId={userId} />
               </div>
             </div>
           )}
 
-          {/* 房主管麦抽屉 */}
+          {/* 房主/共主持管麦抽屉 */}
           {hostPanelOpen && (
             <div
               className="fixed inset-0 z-50 flex justify-end bg-black/50 backdrop-blur-sm"
@@ -200,7 +234,7 @@ export function RoomView({ roomId, isHost, roomName, backgroundUrl }: Props) {
                     关闭
                   </button>
                 </div>
-                <HostPanel roomId={roomId} />
+                <HostPanel roomId={roomId} myRole={role as 'host' | 'cohost'} hostId={hostId} cohostIds={cohostIds} />
               </div>
             </div>
           )}
@@ -218,6 +252,12 @@ export function RoomView({ roomId, isHost, roomName, backgroundUrl }: Props) {
             <h2 className="text-xl font-light tracking-wide text-cream-50">{roomName}</h2>
             <p className="text-xs font-light text-cream-300">点击进入，记得打开麦克风</p>
           </div>
+          {recordingEnabled && (
+            <div className="glass rounded-2xl px-4 py-2 text-center">
+              <p className="text-[11px] font-medium text-rose-light">🔴 本房正在录制</p>
+              <p className="text-[10px] font-light text-cream-300/60">进入即表示知悉</p>
+            </div>
+          )}
           <button
             onClick={() => setEntered(true)}
             className="btn-rose rounded-full px-8 py-3 text-sm font-medium tracking-wide text-white"
