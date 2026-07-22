@@ -156,13 +156,23 @@ export function ChatPanel({ roomId, myRole, myUserId }: Props) {
       // 审核服务不可用时不阻断（降级策略）
     }
     setText('');
-    const { error } = await supabase.from('messages').insert({
-      room_id: roomId,
-      sender_id: user.id,
-      kind: 'text',
-      body,
+    // PRD §6.10 [红线]：通过 API 路由发送（限流 + 服务端审核 + 服务端设置 sender）
+    const { error: msgError } = await fetch('/api/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ roomId, kind: 'text', text: body }),
+    }).then(async (r) => {
+      if (!r.ok) {
+        const e = await r.json().catch(() => ({}));
+        return { error: e.error ?? '发送失败' };
+      }
+      return { error: null as string | null };
     });
-    if (error) alert('发送失败：' + error.message);
+    if (msgError) {
+      if (msgError === 'rate_limited') alert('发送太快了，请稍后再试');
+      else if (msgError === 'content_blocked') alert('消息包含不当内容');
+      else alert('发送失败：' + msgError);
+    }
     setBusy(false);
   }
 
@@ -197,10 +207,22 @@ export function ChatPanel({ roomId, myRole, myUserId }: Props) {
       return;
     }
     const { data: pub } = supabase.storage.from('chat-images').getPublicUrl(path);
-    const { error: mErr } = await supabase
-      .from('messages')
-      .insert({ room_id: roomId, sender_id: user.id, kind: 'image', body: pub.publicUrl });
-    if (mErr) alert('消息发送失败：' + mErr.message);
+    // PRD §6.10 [红线]：通过 API 路由发送（限流）
+    const msgErr = await fetch('/api/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ roomId, kind: 'image', imageUrl: pub.publicUrl }),
+    }).then(async (r) => {
+      if (!r.ok) {
+        const e = await r.json().catch(() => ({}));
+        return e.error ?? '发送失败';
+      }
+      return null;
+    });
+    if (msgErr) {
+      if (msgErr === 'rate_limited') alert('发送太快了，请稍后再试');
+      else alert('消息发送失败：' + msgErr);
+    }
     setBusy(false);
   }
 

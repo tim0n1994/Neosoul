@@ -16,9 +16,11 @@ export async function POST(req: Request) {
   }
 
   let roomId: string | undefined;
+  let inviteCode: string | undefined;
   try {
     const body = await req.json();
     roomId = body?.roomId;
+    inviteCode = body?.inviteCode;
   } catch {
     // empty / invalid body
   }
@@ -38,6 +40,13 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'room not found' }, { status: 404 });
   }
 
+  // PRD §6.2 房间类型准入：private 房需 invite_code
+  if (room.visibility === 'private' && room.host_id !== user.id) {
+    if (!room.invite_code || inviteCode !== room.invite_code) {
+      return NextResponse.json({ error: 'invite_required' }, { status: 403 });
+    }
+  }
+
   // PRD §6.2 封禁检查：命中 room_bans 拒绝
   const { data: ban } = await admin
     .from('room_bans')
@@ -47,16 +56,6 @@ export async function POST(req: Request) {
     .maybeSingle();
   if (ban) {
     return NextResponse.json({ error: 'banned' }, { status: 403 });
-  }
-
-  // PRD §6.2 房间类型准入：private 房需 invite_code
-  if (room.visibility === 'private' && room.invite_code) {
-    // invite_code 在 URL query 或 body 传入——这里简化为：host 永远可进
-    if (room.host_id !== user.id) {
-      // P0: private 房通过链接分享，code 嵌在链接里；API 可在 body 传 inviteCode
-      // 这里不做完整校验，仅 host 和 room_roles 中的人直接放行
-      // TODO: validate inviteCode from body
-    }
   }
 
   // 查 cohost 列表

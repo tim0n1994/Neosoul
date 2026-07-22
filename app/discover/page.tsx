@@ -4,6 +4,7 @@ import { createAdmin } from '@/lib/supabase/admin';
 import { TopBar } from '@/components/TopBar';
 import { RoomCard } from '@/components/discovery/RoomCard';
 import { CreateRoomButton } from '@/components/CreateRoomButton';
+import { ConsentGate } from '@/components/safety/ConsentGate';
 import { rankRooms, type RankableRoom, type RankContext } from '@/lib/ranking';
 
 // PRD §6.5 发现（Hallway）——正在直播的公开房，按兴趣+关注启发式排序。
@@ -24,7 +25,7 @@ export default async function DiscoverPage({
   // 用户信息——兴趣、关注列表、avatar
   const { data: me } = await supabase
     .from('profiles')
-    .select('display_name, avatar_style, avatar_seed, avatar_type, interests')
+    .select('display_name, avatar_style, avatar_seed, avatar_type, interests, tos_accepted_at')
     .eq('id', user.id)
     .maybeSingle();
   if (!me || me.display_name === 'Guest') redirect('/onboarding');
@@ -93,6 +94,8 @@ export default async function DiscoverPage({
 
   return (
     <div className="min-h-[100dvh]">
+      {/* PRD §6.1 [红线] 同意门——未同意条款则拦截 */}
+      {!me.tos_accepted_at && <ConsentGate userId={user.id} />}
       <TopBar
         name={me.display_name}
         style={me.avatar_style}

@@ -1,78 +1,136 @@
-# Neosoul
+# NEOSOUL — 轻量、开放、健康的兴趣语音社交平台
 
-极简语音派对 —— 一个 Web 端 3D 语音派对 Demo。注册/匿名登录 → 选头像 → 建房/进房 → 在 3D 空间里上麦聊天 → 房主管麦 → 公屏发图文。
+> **有 Soul 的灵魂，没有 Soul 的套路。**
 
-技术栈：Next.js 15（App Router）+ React 19 + Supabase + LiveKit + react-three-fiber。
+面向全球 Z 世代的 Web+PWA 兴趣语音社交平台。在 Soul 和 Clubhouse 的经验教训之上，用四大基因超越：**轻（Web+PWA）、可扩展（插件 SDK）、公平（免费完整社交 + 创作者可提现）、安全（强审核 + 透明 AI）**。
 
-## 一、开通外部服务（人工，一次性）
+技术栈：Next.js 15（App Router）+ React 19 + Supabase + LiveKit + Stripe + react-three-fiber。
 
-### 1. Supabase
+---
 
-1. 创建项目，记下：
-   - `Project URL`（形如 `https://xxxx.supabase.co`）
-   - `anon key`
-   - `service_role key`（Settings → API）
-2. **Auth → Providers**：启用 **Email**，并启用 **Anonymous sign-ins**。
-3. **Storage**：新建两个 **public** bucket：
-   - `avatars`
-   - `chat-images`
-4. **SQL Editor**：粘贴并运行 [`supabase/schema.sql`](./supabase/schema.sql)。
-   - 它会建 `profiles` / `rooms` / `messages` 三张表、RLS 策略、自动建 profile 的触发器，并把 `messages` 加入 realtime publication。
-
-> 建议在 Auth 设置里关闭「Confirm email」，Demo 可直接登录。
-
-### 2. LiveKit Cloud
-
-1. 创建项目，记下：
-   - `wss://xxxx.livekit.cloud`（Server URL）
-   - `API Key`
-   - `API Secret`
-
-## 二、本地开发
+## 快速开始
 
 ```bash
 pnpm install
-cp .env.example .env.local   # 填入上面拿到的凭证
+cp .env.example .env.local   # 填入凭证
 pnpm dev                     # http://localhost:3000
 ```
 
-类型检查：
+验证：`pnpm typecheck && pnpm build`
 
-```bash
-pnpm typecheck
-```
+---
 
-## 三、环境变量（`.env.local`）
+## 外部服务开通
+
+### 1. Supabase
+1. 创建项目，记下 `Project URL`、`anon key`、`service_role key`。
+2. **Auth → Providers**：启用 Email（OTP）+ 可选 OAuth（Google/Apple/Discord）。
+3. **Storage**：新建 public bucket：`avatars`、`chat-images`。
+4. **SQL Editor**：先运行 `supabase/schema.sql`（v1 基础），再运行 `supabase/schema_v2.sql`（v2 增量）。
+
+### 2. LiveKit Cloud
+1. 创建项目，记下 `wss://` URL、API Key、API Secret。
+2. **Webhooks**：配置回调到 `https://<domain>/api/livekit/webhook`。
+3. **Egress**（录制）：配置输出到 Supabase Storage 或 S3 兼容存储。
+
+### 3. Stripe
+1. 创建账户，记下 Secret Key、Publishable Key、Webhook Secret。
+2. 创建 Pro 月订阅 Price，记下 Price ID。
+3. **Webhooks**：配置回调到 `https://<domain>/api/stripe/webhook`。
+
+### 4. AI Provider（可选）
+- 设置 `OPENAI_API_KEY` 用于文本审核和 AI 辅助。未配置时审核降级为敏感词表。
+
+---
+
+## 环境变量
 
 | 变量 | 说明 | 端 |
 |---|---|---|
 | `NEXT_PUBLIC_SUPABASE_URL` | Supabase 项目 URL | 客户端+服务端 |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon key | 客户端+服务端 |
-| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role（绕过 RLS，仅房主校验用） | 仅服务端 |
-| `NEXT_PUBLIC_LIVEKIT_URL` | LiveKit `wss://` URL | 客户端+服务端 |
-| `LIVEKIT_API_KEY` | LiveKit API Key | 仅服务端 |
-| `LIVEKIT_API_SECRET` | LiveKit API Secret | 仅服务端 |
+| `SUPABASE_SERVICE_ROLE_KEY` | 绕过 RLS，仅服务端 | 仅服务端 |
+| `NEXT_PUBLIC_LIVEKIT_URL` | LiveKit wss URL | 客户端+服务端 |
+| `LIVEKIT_API_KEY` / `LIVEKIT_API_SECRET` | LiveKit 凭证 | 仅服务端 |
+| `AI_PROVIDER` / `AI_MODEL` / `OPENAI_API_KEY` | AI Provider | 仅服务端 |
+| `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET` | Stripe | 仅服务端 |
+| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Stripe 公钥 | 客户端 |
+| `STRIPE_PRICE_PRO_MONTHLY` | Pro 月订阅 Price ID | 仅服务端 |
+| `NEXT_PUBLIC_VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` | Web Push | 混合 |
 
-> 密钥安全：`SUPABASE_SERVICE_ROLE_KEY` 与 `LIVEKIT_API_SECRET` 只在 `app/api/**` 服务端代码引用，绝不进客户端 bundle。
+> **密钥安全**：所有 Secret 只在 `app/api/**` 和 `lib/` 服务端引用，绝不带 `NEXT_PUBLIC_` 前缀。
 
-## 四、部署到 Vercel
+---
 
-1. 推送仓库到 GitHub。
-2. 在 Vercel 导入项目，Framework Preset 选 **Next.js**。
-3. 在 Vercel 项目设置 → Environment Variables 填入上面 6 个变量。
-4. Deploy。`pnpm build` 已通过验证。
+## 架构
 
-## 五、功能与里程碑
+```
+Client (Next.js + R3F 3D/2D Lite + PWA/SW)
+  ↕ Auth/DB/Realtime/Storage      ↕ WebRTC
+Supabase                          LiveKit Cloud + Egress
+  ↕ service role                   ↕ RoomService/Egress
+Next.js Route Handlers / Edge Functions
+  → Moderation Provider → AI Provider → Stripe → Push
+```
 
-- ✅ M1 账号：邮箱注册/登录 + 匿名登录，Supabase session。
-- ✅ M2 头像与房间：DiceBear 头像选择、房间列表、建房、进房。
-- ✅ M3 语音：LiveKit 连接，房主自动上麦，听众收听，移动端手势进入。
-- ✅ M4 举手与管麦：听众举手 → 房主批准上麦 → 房主可静音/请下麦。
-- ⏳ M5 3D 派对场景：说话者球体实时发光放大（待 M3 语音验收后实现）。
-- ✅ M6 公屏：文字 + 图片实时同步，移动端聊天抽屉。
+### 核心子系统
 
-## 六、架构要点
+| 子系统 | 文件 | 说明 |
+|---|---|---|
+| **舞台权限** | `lib/room-roles.ts` | Host > Cohost > Speaker > Audience 四角色服务端强校验 |
+| **房间生命周期** | `app/api/livekit/webhook/` | 签名校验、participant_count 维护、空房自动下播、Egress→recordings |
+| **内容审核** | `lib/moderation.ts` + `app/api/moderate/` | 敏感词表 + AI 分层审核，入库前拦截 |
+| **反诈** | `lib/moderation.ts:detectFraud` | 转账/投资/外链检测 + 横幅提示 |
+| **安全工具** | `components/safety/` | 举报/拉黑/同意门/未成年门 |
+| **发现排序** | `lib/ranking.ts` | 启发式（关注+兴趣+人数+新鲜度），可替换 |
+| **活动插件** | `lib/activities/` | RoomActivity 接口 + registry + listen-together |
+| **商业化** | `lib/stripe.ts` + `app/api/stripe/` | Pro 订阅 + entitlements + Connect 预留 |
+| **限流** | `lib/ratelimit.ts` | 内存 token-bucket，可替换 Upstash |
 
-- **零自建后端**：所有后端能力来自 Supabase + LiveKit，只写 Next.js Route Handler 做 token 签发与房主鉴权。
-- **麦位权限不落库**：听众进房 `canPublish=false`，房主批准时服务端调 LiveKit `updateParticipant` 改权限，目标端监听权限变更自动开麦。
-- **两个服务端校验点**：`/api/livekit/token` 的 `canPublish` 只由服务端按 `host_id` 判定；`/api/livekit/moderate` 每次复核调用者是房主。
+### 路由保护
+
+中间件保护 `/rooms`、`/discover`、`/onboarding`、`/settings`。同意门（ToS + 出生年份 + 未成年分层）在 `/rooms`、`/discover`、`/settings` 渲染。
+
+---
+
+## 部署（Vercel）
+
+1. 推送到 GitHub。
+2. Vercel 导入项目，Framework: Next.js。
+3. 填入所有环境变量。
+4. 配置 LiveKit Webhook → `/api/livekit/webhook`。
+5. 配置 Stripe Webhook → `/api/stripe/webhook`。
+6. Deploy。
+
+---
+
+## Runbook
+
+### 健康检查
+`GET /api/health` — 探 Supabase/LiveKit/Stripe 可达性。
+
+### 安全事件响应
+- **违规内容**：用户举报 → `/admin` 队列（P1 完善自动化）
+- **诈骗**：反诈横幅自动触发；用户可举报
+- **封禁**：房主/admin 可封禁进房；全局封号走 admin
+- **未成年**：注册时 age gate；< 13 拒绝，< 18 保护模式（不可付费/不可陌生人匹配）
+
+### §16 反面清单（绝不做）
+这是产品 DNA，任何人提议都应被否决：
+1. ❌ 强制送礼才能发起对话
+2. ❌ 按年龄/性别明码标价匹配
+3. ❌ 对高人气用户自动抬高门槛
+4. ❌ 礼物不可提现且 100% 归平台
+5. ❌ 抽卡/盲盒/赌博式付费
+6. ❌ "再匹配需付费"诱导话术
+7. ❌ 伪装真人的暧昧 AI 伴侣
+8. ❌ 把社交基本权利放进付费墙
+9. ❌ 无审核放任有毒内容
+10. ❌ 无内容沉淀的纯 FOMO 增长
+
+---
+
+## 版本历史
+
+- **v2.0** (M0–M6)：上线版——四角色舞台、审核管线、公平商业化、活动插件 SDK、PWA、回放、法律合规
+- **v1.0**：Demo 地基——邮箱 OTP、DiceBear 头像、房间+公屏、3D 场景、admin

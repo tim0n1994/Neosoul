@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { getEntitlements } from '@/lib/stripe';
 import { SubscribeButton } from '@/components/SubscribeButton';
+import { ConsentGate } from '@/components/safety/ConsentGate';
 
 // PRD §6.11 订阅/装扮/账户设置。
 export default async function SettingsPage({
@@ -27,6 +28,7 @@ export default async function SettingsPage({
 
   return (
     <main className="min-h-[100dvh] bg-ink-950 px-6 py-16">
+      {!profile.tos_accepted_at && <ConsentGate userId={user.id} />}
       <div className="mx-auto max-w-lg space-y-6">
         <h1 className="text-xl font-light text-cream-50">设置</h1>
 
