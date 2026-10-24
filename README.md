@@ -2,6 +2,8 @@
 
 > **有 Soul 的灵魂，没有 Soul 的套路。**
 
+面向兴趣而不是付费门槛的语音社区：让完整社交能力保持可用，让创作者获得回报，让安全规则可以被看见。
+
 面向全球 Z 世代的 Web+PWA 兴趣语音社交平台。在 Soul 和 Clubhouse 的经验教训之上，用四大基因超越：**轻（Web+PWA）、可扩展（插件 SDK）、公平（免费完整社交 + 创作者可提现）、安全（强审核 + 透明 AI）**。
 
 技术栈：Next.js 15（App Router）+ React 19 + Supabase + LiveKit + Stripe + react-three-fiber。
