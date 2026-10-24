@@ -32,4 +32,7 @@ jobs:
       - name: Typecheck
         run: pnpm typecheck
       - name: Build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: https://ci-placeholder.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-placeholder-anon-key
         run: pnpm build
