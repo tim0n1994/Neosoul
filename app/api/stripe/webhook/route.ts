@@ -33,8 +33,17 @@ export async function POST(req: Request) {
 
   const admin = createAdmin();
 
-  // 幂等处理：用事件 id 去重
-  // P0 简化：直接处理（Stripe 自身对 webhook 有重试机制）
+  // Claim the event before side effects. The primary key makes Stripe retries harmless.
+  const { error: claimError } = await admin.from('stripe_webhook_events').insert({
+    id: event.id,
+    event_type: event.type,
+  });
+  if (claimError) {
+    if (claimError.code === '23505') {
+      return NextResponse.json({ received: true, duplicate: true });
+    }
+    return NextResponse.json({ error: 'event_claim_failed' }, { status: 503 });
+  }
   switch (event.type) {
     case 'checkout.session.completed': {
       const session = event.data.object;
