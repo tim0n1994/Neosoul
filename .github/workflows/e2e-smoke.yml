@@ -1,0 +1,33 @@
+name: E2E smoke
+
+on:
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: Deployed Neosoul base URL
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  browser:
+    name: Public health and auth boundary
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.15.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install locked dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Install Chromium
+        run: pnpm dlx playwright@1.55.0 install --with-deps chromium
+      - name: Run browser smoke
+        env:
+          NEOSOUL_E2E_BASE_URL: ${{ inputs.base_url }}
+        run: pnpm dlx playwright@1.55.0 test --config=playwright.neosoul.config.ts
