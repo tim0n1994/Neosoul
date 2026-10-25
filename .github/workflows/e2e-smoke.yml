@@ -26,7 +26,7 @@ jobs:
       - name: Install locked dependencies
         run: pnpm install --frozen-lockfile
       - name: Install Playwright test runner
-        run: pnpm add --no-save @playwright/test@1.55.0
+        run: pnpm add --save-dev --ignore-workspace-root-check @playwright/test@1.55.0
       - name: Install Chromium
         run: pnpm exec playwright install --with-deps chromium
       - name: Run browser smoke
