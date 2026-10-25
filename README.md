@@ -154,7 +154,7 @@ Security and acceptance gates now include:
 
 - pnpm security:check plus gitleaks on every CI run.
 - GET /api/health?deep=1 for read-only Supabase and LiveKit probes.
-- Manual [provider smoke workflow](https://github.com/tim0n1994/Neosoul/actions/workflows/provider-smoke.yml) requiring real GitHub secrets.
+- Manual [provider smoke workflow](https://github.com/tim0n1994/Neosoul/actions/workflows/provider-smoke.yml) probing a deployed Supabase/LiveKit health endpoint.
 - Manual [browser E2E workflow](https://github.com/tim0n1994/Neosoul/actions/workflows/e2e-smoke.yml) requiring a deployed base URL.
 
 The current tree no longer contains the previously tracked Supabase token assignment. The historical value still requires external rotation before a formal release. Stripe is intentionally outside the current gate; the preview remains a release candidate until the Supabase/LiveKit smoke, current deployment, and browser E2E produce evidence.
