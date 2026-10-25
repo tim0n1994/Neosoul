@@ -149,4 +149,13 @@ Verified in CI:
 
 The preview does not claim live Supabase, LiveKit, Stripe, moderation, creator payouts, or production operations. Those integrations require configured services and independent end-to-end acceptance.
 
-[Preview release](https://github.com/tim0n1994/Neosoul/releases/tag/v0.1.0-preview.1) · [CI](https://github.com/tim0n1994/Neosoul/actions/runs/40119063994) · [Release gate](https://github.com/tim0n1994/Neosoul/actions/runs/40119998846)
+[Preview release](https://github.com/tim0n1994/Neosoul/releases/tag/v0.1.0-preview.1) · [CI](https://github.com/tim0n1994/Neosoul/actions/runs/40149548733) · [Release gate](https://github.com/tim0n1994/Neosoul/actions/runs/40119998846)
+
+Security and acceptance gates now include:
+
+- pnpm security:check plus gitleaks on every CI run.
+- GET /api/health?deep=1 for read-only Supabase, LiveKit, and Stripe probes.
+- Manual [provider smoke workflow](https://github.com/tim0n1994/Neosoul/actions/workflows/provider-smoke.yml) requiring real GitHub secrets.
+- Manual [browser E2E workflow](https://github.com/tim0n1994/Neosoul/actions/workflows/e2e-smoke.yml) requiring a deployed base URL.
+
+The current tree no longer contains the previously tracked Supabase token assignment. The historical value still requires external rotation and history cleanup before a formal release. The current preview remains a demo artifact until the provider smoke and browser E2E gates produce real evidence.
