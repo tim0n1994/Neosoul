@@ -149,7 +149,7 @@ Verified in CI:
 
 The preview does not claim live Supabase, LiveKit, Stripe, moderation, creator payouts, or production operations. Those integrations require configured services and independent end-to-end acceptance.
 
-[Preview release](https://github.com/tim0n1994/Neosoul/releases/tag/v0.1.0-preview.1) · [CI](https://github.com/tim0n1994/Neosoul/actions/runs/40152697586) · [Release gate](https://github.com/tim0n1994/Neosoul/actions/runs/40119998846)
+[Preview release](https://github.com/tim0n1994/Neosoul/releases/tag/v0.1.0-preview.1) · [CI](https://github.com/tim0n1994/Neosoul/actions/runs/40154387784) · [Release gate](https://github.com/tim0n1994/Neosoul/actions/runs/40119998846)
 
 Security and acceptance gates now include:
 
