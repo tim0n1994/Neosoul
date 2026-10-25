@@ -1,0 +1,31 @@
+name: Provider smoke
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  providers:
+    name: Supabase, LiveKit, and Stripe read-only smoke
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.15.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install locked dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Run provider smoke test
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEOSOUL_NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEOSOUL_NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          NEXT_PUBLIC_LIVEKIT_URL: ${{ secrets.NEOSOUL_NEXT_PUBLIC_LIVEKIT_URL }}
+          LIVEKIT_API_KEY: ${{ secrets.NEOSOUL_LIVEKIT_API_KEY }}
+          LIVEKIT_API_SECRET: ${{ secrets.NEOSOUL_LIVEKIT_API_SECRET }}
+          STRIPE_SECRET_KEY: ${{ secrets.NEOSOUL_STRIPE_SECRET_KEY }}
+        run: pnpm smoke:services
