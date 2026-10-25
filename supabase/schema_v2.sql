@@ -195,3 +195,13 @@ alter publication supabase_realtime add table public.activity_sessions;
 create index if not exists follows_followee_idx on public.follows(followee_id);
 create index if not exists rooms_live_topic_idx on public.rooms(is_live, topic, created_at desc);
 create index if not exists room_bans_lookup_idx on public.room_bans(room_id, user_id);
+
+-- Stripe webhook event claims: service-role only, one event id can be processed once.
+create table if not exists public.stripe_webhook_events (
+  id text primary key,
+  event_type text not null,
+  claimed_at timestamptz not null default now()
+);
+
+alter table public.stripe_webhook_events enable row level security;
+
