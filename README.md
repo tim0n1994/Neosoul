@@ -136,3 +136,17 @@ Next.js Route Handlers / Edge Functions
 
 - **v2.0** (M0–M6)：上线版——四角色舞台、审核管线、公平商业化、活动插件 SDK、PWA、回放、法律合规
 - **v1.0**：Demo 地基——邮箱 OTP、DiceBear 头像、房间+公屏、3D 场景、admin
+
+## Preview status
+
+**v0.1.0-preview.1** is a source preview of the Next.js/PWA voice-social prototype. The repository currently carries the product surface, safety rules, Supabase/LiveKit/Stripe boundaries, and a green typecheck/build gate.
+
+Verified in CI:
+
+- `pnpm install --frozen-lockfile`
+- `pnpm typecheck`
+- `pnpm build` with CI-only placeholder Supabase configuration
+
+The preview does not claim live Supabase, LiveKit, Stripe, moderation, creator payouts, or production operations. Those integrations require configured services and independent end-to-end acceptance.
+
+[Preview release](https://github.com/tim0n1994/Neosoul/releases/tag/v0.1.0-preview.1) · [CI](https://github.com/tim0n1994/Neosoul/actions/runs/40119063994) · [Release gate](https://github.com/tim0n1994/Neosoul/actions/runs/40119998846)
