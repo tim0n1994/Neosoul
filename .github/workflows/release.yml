@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: Existing preview tag to package
+        description: Existing tag to package
         required: true
         type: string
 
@@ -15,7 +15,7 @@ permissions:
 
 jobs:
   verify-and-publish:
-    name: Verify and publish preview
+    name: Verify and publish stable release
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -40,15 +40,19 @@ jobs:
           NEXT_PUBLIC_SUPABASE_URL: https://ci-placeholder.supabase.co
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-placeholder-anon-key
         run: pnpm build
-      - name: Package source preview
+      - name: Package source release
         env:
           RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
         run: |
           mkdir -p release-assets
-          git archive --format=tar.gz --prefix="neosoul-${RELEASE_TAG}/" "${GITHUB_SHA}"             -o "release-assets/neosoul-${RELEASE_TAG}.tar.gz"
-      - name: Publish GitHub preview release
+          git archive --format=tar.gz --prefix="neosoul-${RELEASE_TAG}/" "${GITHUB_SHA}" \
+            -o "release-assets/neosoul-${RELEASE_TAG}.tar.gz"
+      - name: Publish GitHub stable release
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
         run: |
-          gh release create "${RELEASE_TAG}" release-assets/*.tar.gz             --repo "${GITHUB_REPOSITORY}"             --title "Neosoul ${RELEASE_TAG}"             --generate-notes             --prerelease
+          gh release create "${RELEASE_TAG}" release-assets/*.tar.gz \
+            --repo "${GITHUB_REPOSITORY}" \
+            --title "Neosoul ${RELEASE_TAG}" \
+            --generate-notes
