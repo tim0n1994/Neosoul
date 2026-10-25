@@ -138,7 +138,7 @@ Next.js Route Handlers / Edge Functions
 
 ## Preview status
 
-**v0.1.0-preview.1** is a source preview of the Next.js/PWA voice-social prototype. The repository currently carries the product surface, safety rules, and Supabase/LiveKit boundaries. Stripe remains dormant future code and is outside the current release gate.
+**v0.1.1** is the public stable release of the Next.js/PWA voice-social prototype. The repository currently carries the product surface, safety rules, and Supabase/LiveKit boundaries. Stripe remains dormant future code and is outside the current release gate.
 
 Verified in CI:
 
@@ -146,9 +146,9 @@ Verified in CI:
 - `pnpm typecheck`
 - `pnpm build` with CI-only placeholder Supabase configuration
 
-The current release candidate has passed deployed Supabase/LiveKit health smoke and browser E2E against `https://neosoul.udify.fun`. It still does not claim moderation, creator payouts, or full production operations; Stripe is intentionally excluded from this release.
+The public v0.1.1 deployment at `https://neosoul.udify.fun` has passed deployed Supabase/LiveKit smoke and browser E2E. Moderation, creator payouts, and full production operations remain outside this release; Stripe is intentionally excluded.
 
-[Preview release](https://github.com/tim0n1994/Neosoul/releases/tag/v0.1.0-preview.1) · [CI](https://github.com/tim0n1994/Neosoul/actions/runs/40154387784) · [Release gate](https://github.com/tim0n1994/Neosoul/actions/runs/40119998846)
+[Stable release](https://github.com/tim0n1994/Neosoul/releases/tag/v0.1.1) · [CI](https://github.com/tim0n1994/Neosoul/actions/runs/40204840121) · [Provider smoke](https://github.com/tim0n1994/Neosoul/actions/runs/40204701564) · [Browser E2E](https://github.com/tim0n1994/Neosoul/actions/runs/40204704193)
 
 Security and acceptance gates now include:
 
@@ -157,4 +157,4 @@ Security and acceptance gates now include:
 - Manual [provider smoke workflow](https://github.com/tim0n1994/Neosoul/actions/workflows/provider-smoke.yml) probing a deployed Supabase/LiveKit health endpoint.
 - Manual [browser E2E workflow](https://github.com/tim0n1994/Neosoul/actions/workflows/e2e-smoke.yml) requiring a deployed base URL.
 
-The current tree no longer contains the previously tracked Supabase token assignment. The historical value still requires external rotation before a formal release. Supabase/LiveKit smoke and browser E2E are green, while the current Vercel deployment remains blocked from promotion; the formal release waits for that deployment gate.
+The current tree no longer contains the previously tracked Supabase token assignment. The historical value still requires external rotation before a formal release. Supabase/LiveKit smoke and browser E2E are green, while the current Vercel deployment remains blocked from promotion; the formal release gate is complete; future work remains documented above.
