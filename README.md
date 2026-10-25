@@ -6,7 +6,7 @@
 
 面向全球 Z 世代的 Web+PWA 兴趣语音社交平台。在 Soul 和 Clubhouse 的经验教训之上，用四大基因超越：**轻（Web+PWA）、可扩展（插件 SDK）、公平（免费完整社交 + 创作者可提现）、安全（强审核 + 透明 AI）**。
 
-技术栈：Next.js 15（App Router）+ React 19 + Supabase + LiveKit + Stripe + react-three-fiber。
+技术栈：Next.js 15（App Router）+ React 19 + Supabase + LiveKit + react-three-fiber。Stripe 代码边界保留为未来可选能力，不参与当前版本发布。
 
 ---
 
@@ -35,10 +35,8 @@ pnpm dev                     # http://localhost:3000
 2. **Webhooks**：配置回调到 `https://<domain>/api/livekit/webhook`。
 3. **Egress**（录制）：配置输出到 Supabase Storage 或 S3 兼容存储。
 
-### 3. Stripe
-1. 创建账户，记下 Secret Key、Publishable Key、Webhook Secret。
-2. 创建 Pro 月订阅 Price，记下 Price ID。
-3. **Webhooks**：配置回调到 `https://<domain>/api/stripe/webhook`。
+### 3. Stripe（未来可选）
+当前版本不使用 Stripe，也不要求创建 Stripe 账户或配置支付凭证。订阅、Webhook 和 Connect 代码作为未来商业化边界保留，只有明确启用时才配置。
 
 ### 4. AI Provider（可选）
 - 设置 `OPENAI_API_KEY` 用于文本审核和 AI 辅助。未配置时审核降级为敏感词表。
@@ -55,9 +53,9 @@ pnpm dev                     # http://localhost:3000
 | `NEXT_PUBLIC_LIVEKIT_URL` | LiveKit wss URL | 客户端+服务端 |
 | `LIVEKIT_API_KEY` / `LIVEKIT_API_SECRET` | LiveKit 凭证 | 仅服务端 |
 | `AI_PROVIDER` / `AI_MODEL` / `OPENAI_API_KEY` | AI Provider | 仅服务端 |
-| `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET` | Stripe | 仅服务端 |
-| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Stripe 公钥 | 客户端 |
-| `STRIPE_PRICE_PRO_MONTHLY` | Pro 月订阅 Price ID | 仅服务端 |
+| `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET` | Stripe，未来可选 | 仅服务端 |
+| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Stripe 公钥，未来可选 | 客户端 |
+| `STRIPE_PRICE_PRO_MONTHLY` | Pro 月订阅 Price ID，未来可选 | 仅服务端 |
 | `NEXT_PUBLIC_VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` | Web Push | 混合 |
 
 > **密钥安全**：所有 Secret 只在 `app/api/**` 和 `lib/` 服务端引用，绝不带 `NEXT_PUBLIC_` 前缀。
@@ -72,7 +70,8 @@ Client (Next.js + R3F 3D/2D Lite + PWA/SW)
 Supabase                          LiveKit Cloud + Egress
   ↕ service role                   ↕ RoomService/Egress
 Next.js Route Handlers / Edge Functions
-  → Moderation Provider → AI Provider → Stripe → Push
+  → Moderation Provider → AI Provider → Push
+  ↳ Stripe 订阅与 Connect：未来可选，不参与当前发布
 ```
 
 ### 核心子系统
@@ -86,7 +85,7 @@ Next.js Route Handlers / Edge Functions
 | **安全工具** | `components/safety/` | 举报/拉黑/同意门/未成年门 |
 | **发现排序** | `lib/ranking.ts` | 启发式（关注+兴趣+人数+新鲜度），可替换 |
 | **活动插件** | `lib/activities/` | RoomActivity 接口 + registry + listen-together |
-| **商业化** | `lib/stripe.ts` + `app/api/stripe/` | Pro 订阅 + entitlements + Connect 预留 |
+| **商业化（未来）** | `lib/stripe.ts` + `app/api/stripe/` | Pro 订阅 + entitlements + Connect 预留；当前不启用 |
 | **限流** | `lib/ratelimit.ts` | 内存 token-bucket，可替换 Upstash |
 
 ### 路由保护
@@ -101,7 +100,7 @@ Next.js Route Handlers / Edge Functions
 2. Vercel 导入项目，Framework: Next.js。
 3. 填入所有环境变量。
 4. 配置 LiveKit Webhook → `/api/livekit/webhook`。
-5. 配置 Stripe Webhook → `/api/stripe/webhook`。
+5. Stripe Webhook 仅在未来启用商业化时配置。
 6. Deploy。
 
 ---
@@ -109,7 +108,7 @@ Next.js Route Handlers / Edge Functions
 ## Runbook
 
 ### 健康检查
-`GET /api/health` — 探 Supabase/LiveKit/Stripe 可达性。
+`GET /api/health` — 探 Supabase/LiveKit 可达性；Stripe 不属于当前健康检查。
 
 ### 安全事件响应
 - **违规内容**：用户举报 → `/admin` 队列（P1 完善自动化）
@@ -139,7 +138,7 @@ Next.js Route Handlers / Edge Functions
 
 ## Preview status
 
-**v0.1.0-preview.1** is a source preview of the Next.js/PWA voice-social prototype. The repository currently carries the product surface, safety rules, Supabase/LiveKit/Stripe boundaries, and a green typecheck/build gate.
+**v0.1.0-preview.1** is a source preview of the Next.js/PWA voice-social prototype. The repository currently carries the product surface, safety rules, and Supabase/LiveKit boundaries. Stripe remains dormant future code and is outside the current release gate.
 
 Verified in CI:
 
@@ -147,15 +146,15 @@ Verified in CI:
 - `pnpm typecheck`
 - `pnpm build` with CI-only placeholder Supabase configuration
 
-The preview does not claim live Supabase, LiveKit, Stripe, moderation, creator payouts, or production operations. Those integrations require configured services and independent end-to-end acceptance.
+The preview does not claim moderation, creator payouts, or production operations. Supabase and LiveKit require configured services and independent end-to-end acceptance; Stripe is intentionally excluded from this release.
 
 [Preview release](https://github.com/tim0n1994/Neosoul/releases/tag/v0.1.0-preview.1) · [CI](https://github.com/tim0n1994/Neosoul/actions/runs/40154387784) · [Release gate](https://github.com/tim0n1994/Neosoul/actions/runs/40119998846)
 
 Security and acceptance gates now include:
 
 - pnpm security:check plus gitleaks on every CI run.
-- GET /api/health?deep=1 for read-only Supabase, LiveKit, and Stripe probes.
+- GET /api/health?deep=1 for read-only Supabase and LiveKit probes.
 - Manual [provider smoke workflow](https://github.com/tim0n1994/Neosoul/actions/workflows/provider-smoke.yml) requiring real GitHub secrets.
 - Manual [browser E2E workflow](https://github.com/tim0n1994/Neosoul/actions/workflows/e2e-smoke.yml) requiring a deployed base URL.
 
-The current tree no longer contains the previously tracked Supabase token assignment. The historical value still requires external rotation and history cleanup before a formal release. The current preview remains a demo artifact until the provider smoke and browser E2E gates produce real evidence.
+The current tree no longer contains the previously tracked Supabase token assignment. The historical value still requires external rotation before a formal release. Stripe is intentionally outside the current gate; the preview remains a release candidate until the Supabase/LiveKit smoke, current deployment, and browser E2E produce evidence.
