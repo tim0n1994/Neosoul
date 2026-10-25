@@ -2,29 +2,31 @@ name: Supabase and LiveKit smoke
 
 on:
   workflow_dispatch:
+    inputs:
+      base_url:
+        description: Deployed Neosoul base URL
+        required: true
+        default: https://neosoul.udify.fun
+        type: string
 
 permissions:
   contents: read
 
 jobs:
   providers:
-    name: Supabase and LiveKit read-only smoke
+    name: Deployed Supabase and LiveKit read-only smoke
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 10.15.0
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-      - name: Install locked dependencies
-        run: pnpm install --frozen-lockfile
-      - name: Run provider smoke test
+      - name: Probe deployed provider health
         env:
-          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEOSOUL_NEXT_PUBLIC_SUPABASE_URL }}
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEOSOUL_NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-          NEXT_PUBLIC_LIVEKIT_URL: ${{ secrets.NEOSOUL_NEXT_PUBLIC_LIVEKIT_URL }}
-          LIVEKIT_API_KEY: ${{ secrets.NEOSOUL_LIVEKIT_API_KEY }}
-          LIVEKIT_API_SECRET: ${{ secrets.NEOSOUL_LIVEKIT_API_SECRET }}
-        run: pnpm smoke:services
+          BASE_URL: ${{ inputs.base_url }}
+        run: |
+          set -euo pipefail
+          response="$(curl --fail-with-body --max-time 20 "${BASE_URL%/}/api/health?deep=1")"
+          echo "$response"
+          echo "$response" | jq -e '
+            .status == "ok" and
+            .checks.supabase == "ok" and
+            .checks.livekit == "ok"
+          '
