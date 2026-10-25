@@ -31,6 +31,8 @@ jobs:
           cache: pnpm
       - name: Install locked dependencies
         run: pnpm install --frozen-lockfile
+      - name: Security scan
+        run: pnpm security:check
       - name: Typecheck
         run: pnpm typecheck
       - name: Build
