@@ -146,7 +146,7 @@ Verified in CI:
 - `pnpm typecheck`
 - `pnpm build` with CI-only placeholder Supabase configuration
 
-The preview does not claim moderation, creator payouts, or production operations. Supabase and LiveKit require configured services and independent end-to-end acceptance; Stripe is intentionally excluded from this release.
+The current release candidate has passed deployed Supabase/LiveKit health smoke and browser E2E against `https://neosoul.udify.fun`. It still does not claim moderation, creator payouts, or full production operations; Stripe is intentionally excluded from this release.
 
 [Preview release](https://github.com/tim0n1994/Neosoul/releases/tag/v0.1.0-preview.1) · [CI](https://github.com/tim0n1994/Neosoul/actions/runs/40154387784) · [Release gate](https://github.com/tim0n1994/Neosoul/actions/runs/40119998846)
 
@@ -157,4 +157,4 @@ Security and acceptance gates now include:
 - Manual [provider smoke workflow](https://github.com/tim0n1994/Neosoul/actions/workflows/provider-smoke.yml) probing a deployed Supabase/LiveKit health endpoint.
 - Manual [browser E2E workflow](https://github.com/tim0n1994/Neosoul/actions/workflows/e2e-smoke.yml) requiring a deployed base URL.
 
-The current tree no longer contains the previously tracked Supabase token assignment. The historical value still requires external rotation before a formal release. Stripe is intentionally outside the current gate; the preview remains a release candidate until the Supabase/LiveKit smoke, current deployment, and browser E2E produce evidence.
+The current tree no longer contains the previously tracked Supabase token assignment. The historical value still requires external rotation before a formal release. Supabase/LiveKit smoke and browser E2E are green, while the current Vercel deployment remains blocked from promotion; the formal release waits for that deployment gate.
