@@ -50,26 +50,12 @@ async function checkLiveKit(deep: boolean): Promise<Check> {
   }
 }
 
-async function checkStripe(deep: boolean): Promise<Check> {
-  if (!process.env.STRIPE_SECRET_KEY) return 'degraded';
-  if (!deep) return 'ok';
-
-  try {
-    const { getStripe } = await import('@/lib/stripe');
-    const stripe = await getStripe();
-    await withTimeout(() => stripe.balance.retrieve());
-    return 'ok';
-  } catch {
-    return 'degraded';
-  }
-}
 
 export async function GET(request: Request) {
   const deep = new URL(request.url).searchParams.get('deep') === '1';
   const checks = {
     supabase: await checkSupabase(deep),
     livekit: await checkLiveKit(deep),
-    stripe: await checkStripe(deep),
   };
   const allOk = Object.values(checks).every((value) => value === 'ok');
 
