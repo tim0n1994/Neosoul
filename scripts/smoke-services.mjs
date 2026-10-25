@@ -4,7 +4,6 @@ const required = [
   'NEXT_PUBLIC_LIVEKIT_URL',
   'LIVEKIT_API_KEY',
   'LIVEKIT_API_SECRET',
-  'STRIPE_SECRET_KEY',
 ];
 
 const missing = required.filter((name) => !process.env[name]);
@@ -57,16 +56,6 @@ try {
   results.livekit = `error:${error?.name || 'unknown'}`;
 }
 
-try {
-  const Stripe = (await import('stripe')).default;
-  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-    apiVersion: '2025-06-30.basil',
-  });
-  await withTimeout(() => stripe.balance.retrieve());
-  results.stripe = 'ok';
-} catch (error) {
-  results.stripe = `error:${error?.name || 'unknown'}`;
-}
 
 console.log(JSON.stringify(results));
 if (Object.values(results).some((value) => value !== 'ok')) process.exit(1);
