@@ -4,7 +4,7 @@
 
 [![CI](https://github.com/tim0n1994/Neosoul/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/tim0n1994/Neosoul/actions/workflows/ci.yml)
 [![Stable release](https://img.shields.io/github/v/release/tim0n1994/Neosoul?label=release)](https://github.com/tim0n1994/Neosoul/releases)
-[![License](https://img.shields.io/github/license/tim0n1994/Neosoul)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 > Voice social without the paywall maze.
 
@@ -28,7 +28,7 @@ Configure Supabase and LiveKit for auth, storage, realtime data, and voice rooms
 
 ## Current release boundary
 
-The current stable release is [v0.1.1](https://github.com/tim0n1994/Neosoul/releases/tag/v0.1.1). CI, provider smoke checks, and browser E2E are separate signals in the release evidence.
+The current stable release is [v0.1.2](https://github.com/tim0n1994/Neosoul/releases/tag/v0.1.2). CI, provider smoke checks, and browser E2E are separate signals in the release evidence.
 
 Stripe remains an optional future capability. It is not required by this release and is not part of the current smoke or health gate.
 
