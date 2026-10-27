@@ -159,4 +159,4 @@ Security and acceptance gates now include:
 - Manual [provider smoke workflow](https://github.com/tim0n1994/Neosoul/actions/workflows/provider-smoke.yml) probing a deployed Supabase/LiveKit health endpoint.
 - Manual [browser E2E workflow](https://github.com/tim0n1994/Neosoul/actions/workflows/e2e-smoke.yml) requiring a deployed base URL.
 
-The current tree no longer contains the previously tracked Supabase token assignment. The historical value still requires external rotation before a formal release. Supabase/LiveKit smoke, browser E2E, and the Vercel production deployment are green; the formal release gate is complete, and future work remains documented above.
+The current tree no longer contains the previously tracked Supabase token assignment. The historical value still requires external rotation as a security follow-up; it is not used by the current tree. Supabase/LiveKit smoke, browser E2E, and the Vercel production deployment are green; the formal release gate is complete, and future work remains documented above.
