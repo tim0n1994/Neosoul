@@ -5,6 +5,7 @@
 [![CI](https://github.com/tim0n1994/Neosoul/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/tim0n1994/Neosoul/actions/workflows/ci.yml)
 [![Stable release](https://img.shields.io/github/v/release/tim0n1994/Neosoul?label=release)](https://github.com/tim0n1994/Neosoul/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[Security policy](SECURITY.md)
 
 > Voice social without the paywall maze.
 
