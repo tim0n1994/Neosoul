@@ -4,6 +4,8 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
+[安全策略](SECURITY.md)
+
 > **有 Soul 的灵魂，没有 Soul 的套路。**
 
 面向兴趣而不是付费门槛的语音社区：让完整社交能力保持可用，让创作者获得回报，让安全规则可以被看见。
@@ -150,9 +152,9 @@ Verified in CI:
 - `pnpm typecheck`
 - `pnpm build` with CI-only placeholder Supabase configuration
 
-The public v0.1.2 deployment at `https://neosoul.udify.fun` has passed deployed Supabase/LiveKit smoke and browser E2E. Moderation, creator payouts, and full production operations remain outside this release; Stripe is intentionally excluded.
+The deployed application path has prior Supabase/LiveKit smoke and browser E2E evidence on the application-validation commits linked below. The v0.1.2 release carries the current source, version, and license alignment. Moderation, creator payouts, and full production operations remain outside this release; Stripe is intentionally excluded.
 
-[Stable release](https://github.com/tim0n1994/Neosoul/releases/tag/v0.1.2) · [CI](https://github.com/tim0n1994/Neosoul/actions/runs/40204840121) · [Provider smoke](https://github.com/tim0n1994/Neosoul/actions/runs/40204701564) · [Browser E2E](https://github.com/tim0n1994/Neosoul/actions/runs/40204704193)
+[Stable release](https://github.com/tim0n1994/Neosoul/releases/tag/v0.1.2) · [Release workflow](https://github.com/tim0n1994/Neosoul/actions/runs/40526078032) · [CI for v0.1.2](https://github.com/tim0n1994/Neosoul/actions/runs/40513007870) · [Prior provider smoke](https://github.com/tim0n1994/Neosoul/actions/runs/40204701564) · [Prior browser E2E](https://github.com/tim0n1994/Neosoul/actions/runs/40204704193)
 
 Security and acceptance gates now include:
 
