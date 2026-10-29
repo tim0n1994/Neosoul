@@ -144,7 +144,7 @@ Next.js Route Handlers / Edge Functions
 
 ## Preview status
 
-**v0.1.2** is the public stable release of the Next.js/PWA voice-social prototype. The repository currently carries the product surface, safety rules, and Supabase/LiveKit boundaries. Stripe remains dormant future code and is outside the current release gate.
+**v0.1.4** is the public stable release of the Next.js/PWA voice-social prototype. The repository currently carries the product surface, safety rules, and Supabase/LiveKit boundaries. Stripe remains dormant future code and is outside the current release gate.
 
 Verified in CI:
 
@@ -152,9 +152,9 @@ Verified in CI:
 - `pnpm typecheck`
 - `pnpm build` with CI-only placeholder Supabase configuration
 
-The deployed application path has prior Supabase/LiveKit smoke and browser E2E evidence on the application-validation commits linked below. The v0.1.2 release carries the current source, version, and license alignment. Moderation, creator payouts, and full production operations remain outside this release; Stripe is intentionally excluded.
+The deployed application path has prior Supabase/LiveKit smoke and browser E2E evidence on the application-validation commits linked below. The v0.1.4 release carries the current source, version, and license alignment. Moderation, creator payouts, and full production operations remain outside this release; Stripe is intentionally excluded.
 
-[Stable release](https://github.com/tim0n1994/Neosoul/releases/tag/v0.1.2) · [Release workflow](https://github.com/tim0n1994/Neosoul/actions/runs/40526078032) · [CI for v0.1.2](https://github.com/tim0n1994/Neosoul/actions/runs/40513007870) · [Prior provider smoke](https://github.com/tim0n1994/Neosoul/actions/runs/40204701564) · [Prior browser E2E](https://github.com/tim0n1994/Neosoul/actions/runs/40204704193)
+[Stable release](https://github.com/tim0n1994/Neosoul/releases/tag/v0.1.4) · [Release workflow](https://github.com/tim0n1994/Neosoul/actions/workflows/release.yml) · [CI](https://github.com/tim0n1994/Neosoul/actions/workflows/ci.yml) · [Prior provider smoke](https://github.com/tim0n1994/Neosoul/actions/runs/40204701564) · [Prior browser E2E](https://github.com/tim0n1994/Neosoul/actions/runs/40204704193)
 
 Security and acceptance gates now include:
 

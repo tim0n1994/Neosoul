@@ -29,7 +29,7 @@ Configure Supabase and LiveKit for auth, storage, realtime data, and voice rooms
 
 ## Current release boundary
 
-The current stable release is [v0.1.2](https://github.com/tim0n1994/Neosoul/releases/tag/v0.1.2). CI, provider smoke checks, and browser E2E are separate signals in the release evidence.
+The current stable release is [v0.1.4](https://github.com/tim0n1994/Neosoul/releases/tag/v0.1.4). CI, provider smoke checks, and browser E2E are separate signals in the release evidence.
 
 Stripe remains an optional future capability. It is not required by this release and is not part of the current smoke or health gate.
 
